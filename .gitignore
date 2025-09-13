@@ -1,0 +1,14 @@
+/.venv/*
+/.idea/*
+/Linkori/frontend/node_modules/*
+/Linkori/Linkori/__pycache__/*
+/Linkori/Accounts/__pycache__/*
+.gitingore
+Linkori/frontend/package-lock.json
+Linkori/staticfiles/*
+Linkori/dist/*
+Linkori/certs/*
+/Linkori/Linkori/settings.py
+/Linkori/db.sqlite3
+__pycache__/
+migrations/
