@@ -1,11 +1,4 @@
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'https://127.0.0.1:8000';
-
-const instance = axios.create({
-    baseURL: API_URL,
-    withCredentials: true,
-});
+import { instance } from '../hooks/useAuth';
 
 export const loginWithDiscord = async (accessToken) => {
     try {
@@ -55,21 +48,6 @@ export const handleOsuCallback = async (code) => {
         return response.data;
     } catch (error) {
         console.error('Ошибка при обработке callback osu!:', error);
-        throw error;
-    }
-};
-
-export const refreshToken = async () => {
-    try {
-        console.log('Attempting to refresh access token');
-        const response = await instance.post('/api/token/refresh/', {});
-        console.log('Refresh response:', response.data);
-        if (response.data.access) {
-            return { access: response.data.access };
-        }
-        throw new Error('Не удалось обновить токен');
-    } catch (error) {
-        console.error('Ошибка при обновлении токена:', error);
         throw error;
     }
 };

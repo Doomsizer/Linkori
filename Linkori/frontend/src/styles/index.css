@@ -1,0 +1,26 @@
+* {
+    box-sizing: border-box;
+    --linkori-red: rgb(158, 51, 61);
+    --linkori-black: rgb(17, 14, 23);
+    --linkori-lavander: rgb(110, 98, 144);
+    --linkori-yellow: rgb(247, 208, 68);
+    --linkori-pink: rgb(238, 219, 225);
+    --linkori-white: rgb(245, 245, 245);
+    --linkori-brown: rgb(120, 94, 95);
+    --osu-pink: rgb(255, 102, 170);
+    --discord-blue: rgb(119, 133, 204);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    overflow-x: hidden;
+    font-family: Play, serif;
+}
+
+@font-face {
+    font-family: Play;
+    src: url("../fonts/Play/Play-Regular.ttf");
+    font-weight: normal;
+}

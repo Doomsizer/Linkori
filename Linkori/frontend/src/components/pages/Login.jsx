@@ -79,8 +79,13 @@ const Login = () => {
 
     return (
         <div className="login-container">
-            <h2>Вход</h2>
-            {error && <p className="error-message">{error}</p>}
+            <h2>Авторизация</h2>
+            <p className="login-info">
+                Для использования сервиса вам потребуется войти через ваши osu! и discord аккаунты.<br/>
+                <a href="/data-privacy/">Данные</a>, получаемые с верификации являются публично доступными. <br/> Вы всегда можете отозвать привязку
+                в настройках osu! или discord.
+            </p>
+            {error && <span className="login-error-message">{error}</span>}
             <button className="login-button" onClick={handleDiscordLogin}>
                 Войти через Discord
             </button>

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { loginWithDiscord, loginWithOsu } from '../services/AuthService';
+import {useNavigate} from "react-router-dom";
 import '../../styles/Profile.css';
 
 const Profile = () => {
     const { accessToken, logout } = useAuth();
     const [userData, setUserData] = useState({ discord: null, osu: null });
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -55,31 +57,37 @@ const Profile = () => {
         }
     };
 
+    const toLogin = () => {
+        navigate('/login')
+    }
+
     return (
         <div className="profile-container">
             <h2>Профиль</h2>
-            {error && <p className="error-message">{error}</p>}
+            {error && <span className="profile-error-message">{error}</span>}
             {accessToken ? (
                 <>
-                    <p>Вы авторизованы!</p>
                     <p>Discord: {userData.discord || 'Не привязан'}</p>
                     <p>osu!: {userData.osu || 'Не привязан'}</p>
                     {!userData.discord && (
-                        <button className="link-button" onClick={handleLinkDiscord}>
+                        <button className="profile-link-button" onClick={handleLinkDiscord}>
                             Привязать Discord
                         </button>
                     )}
                     {!userData.osu && (
-                        <button className="link-button" onClick={handleLinkOsu}>
+                        <button className="profile-link-button" onClick={handleLinkOsu}>
                             Привязать osu!
                         </button>
                     )}
-                    <button className="logout-button" onClick={logout}>
+                    <button className="profile-logout-button" onClick={logout}>
                         Выйти
                     </button>
                 </>
             ) : (
-                <p>Пожалуйста, войдите в систему.</p>
+                <>
+                    <span>Пожалуйста, войдите в систему.</span>
+                    <button className="profile-toLogin-button" onClick={toLogin}>Войти</button>
+                </>
             )}
         </div>
     );
