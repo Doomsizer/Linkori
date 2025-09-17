@@ -1,7 +1,8 @@
 import React from "react";
 import { Fragment, Suspense, lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import '../styles/index.css';
+import LoadingSpinner from "./components/LoadingSpinner";
+import "../styles/index.css";
 
 const Profile = lazy(() => import("./pages/Profile"));
 const Login = lazy(() => import("./pages/Login"));
@@ -12,7 +13,7 @@ function App() {
     return (
         <Fragment>
             <BrowserRouter>
-                <Suspense fallback={<div>Загрузка...</div>}>
+                <Suspense fallback={<LoadingSpinner/>}>
                     <Routes>
                         <Route path="*" element={<MainPage />}/>
                         <Route path="/login" element={<Login />} />

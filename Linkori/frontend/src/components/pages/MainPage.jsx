@@ -1,11 +1,13 @@
 import React from "react";
 import { useAuth } from "../hooks/useAuth";
+import LoadingSpinner from "../components/LoadingSpinner";
+import "../../styles/MainPage.css";
 
 const MainPage = () => {
     const { isAuthenticated, isRefreshing } = useAuth();
 
     if (isRefreshing) {
-        return <div>Загрузка...</div>;
+        return <LoadingSpinner/>;
     }
 
     return isAuthenticated ? (

@@ -3,7 +3,7 @@ import "../../styles/DataPrivacy.css"
 
 const DataPrivacy = () => {
     return (
-        <div className="data-privacy-container">
+        <>
             <div className="data-privacy-content">
                 <h1>Политика обработки персональных данных</h1>
                 <section className="privacy-section">
@@ -63,7 +63,7 @@ const DataPrivacy = () => {
                     </p>
                 </section>
             </div>
-        </div>
+        </>
     )
 };
 

@@ -78,7 +78,7 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
+        <>
             <h2>Авторизация</h2>
             <p className="login-info">
                 Для использования сервиса вам потребуется войти через ваши osu! и discord аккаунты.<br/>
@@ -92,7 +92,7 @@ const Login = () => {
             <button className="login-button" onClick={handleOsuLogin}>
                 Войти через osu!
             </button>
-        </div>
+        </>
     );
 };
 

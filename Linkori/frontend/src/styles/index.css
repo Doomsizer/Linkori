@@ -19,8 +19,71 @@ html, body {
     font-family: Play, serif;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: var(--linkori-black);
+    color: var(--linkori-white);
+}
+
 @font-face {
     font-family: Play;
     src: url("../fonts/Play/Play-Regular.ttf");
     font-weight: normal;
+}
+
+.wrapper {
+    z-index: 9999;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
+.pokeball {
+    width: 60px;
+    height: 60px;
+    background-color: var(--linkori-white);
+    border-radius: 50% ;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid var(--linkori-black);;
+    animation: frames .8s  linear 0s infinite;
+}
+
+.pokeball:after{
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 30px;
+    background-color: var(--discord-blue);
+    border-bottom: 4px solid var(--linkori-black);
+    top: -4px
+}
+
+.pokeball:before{
+    content: '';
+    position: absolute;
+    background-color: var(--linkori-white);
+    width: 10px;
+    height:10px;
+    border: 4px solid var(--linkori-black);
+    border-radius: 50%;
+    bottom: 18px;
+    right: 18px;
+    z-index: 1;
+}
+
+@keyframes frames{
+    0% {
+        transform: rotate(0deg);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
 }

@@ -1,6 +1,16 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 
+AVATAR_SOURCES = [
+    ('osu', 'Osu!'),
+    ('discord', 'Discord'),
+]
+NICK_SOURCES = [
+    ('osu', 'Osu!'),
+    ('discord_username', 'Discord Username'),
+    ('discord_display_name', 'Discord Display Name'),
+]
+
 REGIONS = {
     "SA": "Республика Саха",
     "KHA": "Хабаровский край",
@@ -153,12 +163,10 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, discord_id=None, osu_id=None, **extra_fields):
         if not discord_id and not osu_id:
             raise ValueError('Должен быть указан хотя бы один ID: discord_id или osu_id')
-
         if discord_id:
             identifier = f'discord:{discord_id}'
         else:
             identifier = f'osu:{osu_id}'
-
         user = self.model(identifier=identifier, **extra_fields)
         user.save(using=self._db)
         return user
@@ -166,12 +174,10 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, discord_id=None, osu_id=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser должен иметь is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser должен иметь is_superuser=True.')
-
         return self.create_user(discord_id=discord_id, osu_id=osu_id, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -181,17 +187,27 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_linked = models.BooleanField(default=False)
+    avatar_source = models.CharField(max_length=10, choices=AVATAR_SOURCES, null=True, blank=True)
+    nick_source = models.CharField(max_length=20, choices=NICK_SOURCES, null=True, blank=True)
+    region = models.CharField(max_length=3, choices=list(REGIONS.items()), null=True, blank=True)
+    city = models.CharField(max_length=3, choices=[(code, name) for code, name in CITIES], null=True, blank=True)
 
     objects = CustomUserManager()
-
     USERNAME_FIELD = 'identifier'
-
     password = None
-
     last_login = None
 
     def has_usable_password(self):
         return False
+
+    def get_region_display(self):
+        return REGIONS.get(self.region, '')
+
+    def get_city_display(self):
+        for code, name in CITIES:
+            if code == self.city:
+                return name
+        return ''
 
     def save(self, *args, **kwargs):
         self.is_linked = bool(self.osu_user and self.discord_user)
@@ -202,7 +218,6 @@ class OsuUsers(models.Model):
     access_token = models.CharField(max_length=255)
     refresh_token = models.CharField(max_length=255, blank=True)
     token_expires_at = models.DateTimeField()
-
 
 class UnauthorizedOsuUsers(models.Model):
     osu_id = models.CharField(max_length=255, unique=True)

@@ -1,13 +1,3 @@
-.login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: var(--linkori-black);
-    color: var(--linkori-white);
-}
-
 .login-button {
     background-color: var(--discord-blue);
     color: var(--linkori-white);

@@ -3,6 +3,7 @@
 /Linkori/frontend/node_modules/*
 /Linkori/Linkori/__pycache__/*
 /Linkori/Accounts/__pycache__/*
+/Linkori/commands
 .gitingore
 Linkori/frontend/package-lock.json
 Linkori/staticfiles/*

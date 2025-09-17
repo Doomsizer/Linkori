@@ -6,14 +6,16 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
 import logging
 from django.shortcuts import redirect
-from urllib.parse import urlencode
+from .models import REGIONS, CITIES, LINKED
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 from .services import handle_osu_callback, handle_discord_callback
-from .models import CustomUser
 from .serializers import CustomUserSerializer
 
 logger = logging.getLogger(__name__)
+
+
+CITY_CODE_MAP = {name: code for code, name in CITIES}
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -93,10 +95,47 @@ def discord_callback_view(request):
     logger.warning("Failed Discord callback, redirecting to /login")
     return redirect('/login')
 
-@api_view(['GET'])
+
+@api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def user_view(request):
     logger.info(f"Headers: {request.headers}")
     logger.info(f"User: {request.user}, Authenticated: {request.user.is_authenticated}")
-    serializer = CustomUserSerializer(request.user)
-    return JsonResponse(serializer.data, safe=False)
+
+    if request.method == 'GET':
+        serializer = CustomUserSerializer(request.user)
+        return JsonResponse(serializer.data, safe=False)
+    elif request.method == 'PUT':
+        serializer = CustomUserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_profile(request):
+    serializer = CustomUserSerializer(request.user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(serializer.data)
+    return JsonResponse(serializer.errors, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_regions(request):
+    regions = [{'code': code, 'name': name} for code, name in REGIONS.items()]
+    return JsonResponse({'regions': regions}, safe=False)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_cities(request):
+    region = request.GET.get('region')
+    if not region or region not in LINKED:
+        return JsonResponse({'cities': []}, safe=False)
+    cities = []
+    for name in LINKED[region]:
+        if name in CITY_CODE_MAP:
+            code = CITY_CODE_MAP[name]
+            cities.append({'code': code, 'name': name})
+    return JsonResponse({'cities': cities}, safe=False)
