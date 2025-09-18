@@ -13,7 +13,9 @@ const MainPage = () => {
     return isAuthenticated ? (
         <div>Таблица</div>
     ) : (
-        <div>Войдите, пожалуйста, в аккаунт</div>
+        <main>
+            <span>Войдите, пожалуйста, в аккаунт</span>
+        </main>
     );
 };
 

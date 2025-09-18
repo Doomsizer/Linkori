@@ -304,7 +304,7 @@ const Profile = () => {
     const hasOsu = !!userData.osu_user;
 
     return (
-        <>
+        <main>
             {!initialLoadComplete ? (
                 <LoadingSpinner/>
             ) : (
@@ -396,7 +396,7 @@ const Profile = () => {
                     </button>
                 </>
             )}
-        </>
+        </main>
     );
 };
 
