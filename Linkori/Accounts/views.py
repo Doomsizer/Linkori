@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
 import logging
 from django.shortcuts import redirect
-from .models import REGIONS, CITIES, LINKED
+from Leaderboard.regions import REGIONS, CITIES, LINKED
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 from .services import handle_osu_callback, handle_discord_callback

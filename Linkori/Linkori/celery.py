@@ -13,7 +13,15 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'parse-discord-servers-daily': {
         'task': 'DiscordBot.tasks.parse_discord_servers',
-        'schedule': crontab(hour='1'),
+        'schedule': crontab(hour=1),
+    },
+    'parse-extension-daily': {
+        'task': 'Leaderboard.tasks.parse_browser_extension',
+        'schedule': crontab(hour=2),
+    },
+    'parse-google-sheet-daily': {
+        'task': 'Leaderboard.tasks.parse_google_sheet',
+        'schedule': crontab(minute='*/1'),
     },
 }
 

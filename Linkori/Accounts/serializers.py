@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import CustomUser, DiscordUsers, OsuUsers, UnauthorizedOsuUsers, REGIONS, LINKED, AVATAR_SOURCES, NICK_SOURCES, CITIES
+from .models import CustomUser, DiscordUsers, OsuUsers, UnauthorizedOsuUsers, AVATAR_SOURCES, NICK_SOURCES
+from Leaderboard.regions import REGIONS, LINKED, CITIES
 import requests
 import urllib.parse
 import logging
