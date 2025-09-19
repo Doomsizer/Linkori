@@ -1,9 +1,12 @@
 import logging
+import requests
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .exceptions import TokenError
 from .models import CustomUser, UnauthorizedOsuUsers, DiscordUsers
+from Leaderboard.models import ServerMember
+from DiscordBot.models import DiscordServer
 from .oauth_utils import process_osu_token, get_osu_user_data, create_or_update_osu_user, process_discord_token, get_discord_user_data, create_or_update_discord_user
 
 logger = logging.getLogger(__name__)
@@ -96,12 +99,16 @@ def handle_discord_callback(request):
         discord_data = get_discord_user_data(token_data['access_token'])
         if not discord_data:
             logger.error("Failed to get Discord user data")
-            return JsonResponse({'message': 'Failed to get Discord user data', 'status': 'fail'}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'message': 'Failed to get Discord user data', 'status': 'fail'}, status=400)
 
         discord_id = discord_data['id']
         nick = discord_data['username']
         display_name = discord_data.get('global_name')
-        avatar = discord_data.get('avatar')
+        try:
+            avatar = discord_data['avatar']
+        except Exception:
+            logger.info(f"Discord user {discord_id} doesnt have avatar")
+            avatar = None
 
         discord_user = create_or_update_discord_user(
             discord_id=discord_id,
@@ -138,6 +145,26 @@ def handle_discord_callback(request):
             user.save()
             logger.info(f"Created new CustomUser for Discord user {discord_id}")
 
+        try:
+            guilds_url = 'https://discord.com/api/users/@me/guilds'
+            headers = {'Authorization': f'Bearer {token_data["access_token"]}'}
+            response = requests.get(guilds_url, headers=headers, timeout=5)
+            if response.status_code == 200:
+                guilds_data = response.json()
+                bot_servers = set(DiscordServer.objects.values_list('server_id', flat=True))
+                for guild in guilds_data:
+                    if guild['id'] in bot_servers:
+                        server = DiscordServer.objects.get(server_id=guild['id'])
+                        ServerMember.objects.get_or_create(
+                            user=user,
+                            server=server
+                        )
+                        logger.info(f"Added ServerMember for user {user.identifier} on server {server.server_name}")
+            else:
+                logger.warning(f"Failed to fetch guilds for Discord user {discord_id}, status: {response.status_code}")
+        except requests.RequestException as e:
+            logger.error(f"Error fetching guilds for Discord user {discord_id}: {str(e)}")
+
         refresh = RefreshToken.for_user(user)
         response = JsonResponse({
             'access': str(refresh.access_token),
@@ -156,4 +183,4 @@ def handle_discord_callback(request):
 
     except TokenError as e:
         logger.error(f"OAuth error: {str(e)}")
-        return JsonResponse({'message': str(e), 'status': 'fail'}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({'message': str(e), 'status': 'fail'}, status=400)

@@ -5,6 +5,7 @@ from .discord_api import DiscordBotApi
 from DiscordBot.models import DiscordServer
 from Accounts.models import CustomUser, DiscordUsers
 from Leaderboard.models import ServerMember
+from .models import DiscordServer
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +13,7 @@ logger = logging.getLogger(__name__)
 @shared_task
 def parse_discord_servers():
     """
-    Задача для парсинга серверов Discord через API бота.
-    Выполняется периодически через Celery Beat.
+    Задача для парсинга discord серверов на которых есть бот.
     """
     logger.info("Starting Discord servers parsing task")
 
