@@ -99,16 +99,18 @@ def discord_callback_view(request):
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def user_view(request):
-    logger.info(f"Headers: {request.headers}")
-    logger.info(f"User: {request.user}, Authenticated: {request.user.is_authenticated}")
-
     if request.method == 'GET':
         serializer = CustomUserSerializer(request.user)
-        return JsonResponse(serializer.data, safe=False)
+        return JsonResponse(serializer.data)
     elif request.method == 'PUT':
         serializer = CustomUserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            if 'region' in request.data and request.user.osu_user:
+                osu = request.user.osu_user.osu
+                osu.region = request.data['region']
+                osu.cities = request.data.get('city', osu.cities)
+                osu.save()
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors, status=400)
 

@@ -30,8 +30,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
     osu_user = OsuUserSerializer(read_only=True)
     avatar_source = serializers.ChoiceField(choices=AVATAR_SOURCES, required=False)
     nick_source = serializers.ChoiceField(choices=NICK_SOURCES, required=False)
-    region = serializers.CharField(required=False, allow_blank=True)
-    city = serializers.CharField(required=False, allow_blank=True)
+    region = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
     region_display = serializers.SerializerMethodField()
     city_display = serializers.SerializerMethodField()
     displayed_avatar_url = serializers.SerializerMethodField()
@@ -42,12 +42,24 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'discord_user', 'osu_user', 'avatar_source', 'nick_source', 'region', 'city',
                   'region_display', 'city_display', 'displayed_avatar_url', 'displayed_nick']
 
+    def get_region(self, obj):
+        if obj.osu_user and obj.osu_user.osu:
+            return obj.osu_user.osu.region
+        return None
+
+    def get_city(self, obj):
+        if obj.osu_user and obj.osu_user.osu:
+            return obj.osu_user.osu.cities
+        return None
+
     def get_region_display(self, obj):
-        return REGIONS.get(obj.region, '')
+        region = self.get_region(obj)
+        return REGIONS.get(region, '')
 
     def get_city_display(self, obj):
+        city = self.get_city(obj)
         for code, name in CITIES:
-            if code == obj.city:
+            if code == city:
                 return name
         return ''
 

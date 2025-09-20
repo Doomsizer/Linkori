@@ -42,8 +42,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_linked = models.BooleanField(default=False)
     avatar_source = models.CharField(max_length=10, choices=AVATAR_SOURCES, null=True, blank=True)
     nick_source = models.CharField(max_length=20, choices=NICK_SOURCES, null=True, blank=True)
-    region = models.CharField(max_length=3, choices=list(REGIONS.items()), null=True, blank=True)
-    city = models.CharField(max_length=3, choices=[(code, name) for code, name in CITIES], null=True, blank=True)
 
     objects = CustomUserManager()
     USERNAME_FIELD = 'identifier'
