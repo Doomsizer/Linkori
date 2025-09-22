@@ -1,0 +1,73 @@
+header {
+    margin-bottom: auto;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 50px;
+}
+
+.header-logo {
+    background-color: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--linkori-white);
+    cursor: pointer;
+}
+
+.header-login-btn {
+    background-color: var(--linkori-lavander);
+    color: var(--linkori-white);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+.header-login-btn:hover {
+    opacity: 70%;
+}
+
+.header-user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 20px;
+    transition: background-color 0.2s;
+}
+
+.header-user:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.header-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.header-logout-btn {
+    background-color: var(--linkori-red);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.header-logout-btn:hover {
+    opacity: 70%;
+}

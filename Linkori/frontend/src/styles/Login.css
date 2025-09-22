@@ -1,0 +1,26 @@
+.login-button {
+    background-color: var(--discord-blue);
+    color: var(--linkori-white);
+    width: 15%;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    font-family: inherit;
+}
+
+.login-info {
+    text-align: center;
+    font-size: 20px;
+}
+
+.login-button:nth-child(4) {
+    background-color: var(--osu-pink);
+}
+
+.login-error-message {
+    color: var(--linkori-red);
+    margin-bottom: 10px;
+}
