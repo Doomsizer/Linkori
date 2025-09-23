@@ -140,8 +140,6 @@ const Profile = () => {
 
             try {
                 const regionsRes = await fetch('https://127.0.0.1:8000/accounts/regions/', {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    credentials: 'include',
                 });
                 if (regionsRes.ok) {
                     const regionsData = await regionsRes.json();

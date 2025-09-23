@@ -1,8 +1,7 @@
 import json
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.conf import settings
-from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
 import logging
 from django.shortcuts import redirect
@@ -124,7 +123,7 @@ def update_user_profile(request):
     return JsonResponse(serializer.errors, status=400)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def get_regions(request):
     regions = [{'code': code, 'name': name} for code, name in REGIONS.items()]
     return JsonResponse({'regions': regions}, safe=False)

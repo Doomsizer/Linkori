@@ -5,6 +5,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import Header from "./components/Header"
 import Footer from "./components/Footer"
 import "../styles/index.css";
+import Leaderboard from "./pages/Leaderboard";
 
 const Profile = lazy(() => import("./pages/Profile"));
 const Login = lazy(() => import("./pages/Login"));
@@ -20,10 +21,11 @@ function App() {
                     <Routes>
                         <Route path="*" element={<MainPage />}/>
                         <Route path="/login" element={<Login />} />
-                        <Route path="/data-privacy/" element={<DataPrivacy />} />
+                        <Route path="/data-privacy" element={<DataPrivacy />} />
                         <Route path="/callback/discord/*" element={<Login />} />
                         <Route path="/callback/osu/*" element={<Login />} />
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/leaderboard" element={<Leaderboard/>}/>
                     </Routes>
                     <Footer/>
                 </Suspense>
