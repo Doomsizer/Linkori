@@ -31,11 +31,6 @@
     margin-bottom: 20px;
 }
 
-.leaderboard-table thead {
-    position: sticky;
-    z-index: 100;
-}
-
 .leaderboard-table th {
     background-color: var(--linkori-black);
     color: var(--linkori-white);
@@ -167,5 +162,144 @@
     .leaderboard-pagination {
         flex-direction: column;
         gap: 10px;
+    }
+}
+
+.leaderboard-type-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    justify-content: center;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.leaderboard-type-button {
+    background-color: var(--linkori-lavander);
+    color: var(--linkori-white);
+    padding: 12px 24px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.leaderboard-type-button:hover:not(:disabled) {
+    background-color: var(--discord-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.leaderboard-type-button.active {
+    background-color: var(--osu-pink);
+    border-color: var(--linkori-white);
+    font-weight: bold;
+}
+
+.leaderboard-type-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--linkori-brown);
+}
+
+.leaderboard-filters {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 30px;
+    justify-content: center;
+    align-items: flex-end;
+    width: 100%;
+    max-width: 1000px;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.leaderboard-label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--linkori-white);
+    min-width: 150px;
+}
+
+.leaderboard-select {
+    padding: 10px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--linkori-lavander);
+    background-color: var(--linkori-black);
+    color: var(--linkori-white);
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.leaderboard-select:hover:not(:disabled) {
+    border-color: var(--discord-blue);
+    box-shadow: 0 0 5px rgba(119, 133, 204, 0.3);
+}
+
+.leaderboard-select:focus {
+    outline: none;
+    border-color: var(--osu-pink);
+    box-shadow: 0 0 8px rgba(255, 102, 170, 0.3);
+}
+
+.leaderboard-select:disabled {
+    background-color: var(--linkori-brown);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .leaderboard-type-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .leaderboard-type-button {
+        width: 100%;
+        max-width: 250px;
+        padding: 10px 20px;
+    }
+
+    .leaderboard-filters {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .leaderboard-label {
+        width: 100%;
+        max-width: 250px;
+        min-width: unset;
+    }
+
+    .leaderboard-select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .leaderboard-filters {
+        padding: 10px;
+        gap: 12px;
+    }
+
+    .leaderboard-label {
+        font-size: 13px;
+    }
+
+    .leaderboard-select {
+        padding: 8px 10px;
+        font-size: 13px;
     }
 }

@@ -67,7 +67,7 @@ def parse_players():
                 "region": list(REGIONS.keys())[list(REGIONS.values()).index(region_normalized)]
             }
             if city_name:
-                defaults["cities"] = city_name
+                defaults["cities"] = city_code
             UnauthorizedOsuUsers.objects.get_or_create(
                 osu_id=get_osu_user_id(profile_url),
                 defaults=defaults

@@ -1,3 +1,4 @@
+from attr.validators import max_len
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from Leaderboard.regions import REGIONS, CITIES

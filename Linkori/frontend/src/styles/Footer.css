@@ -5,27 +5,18 @@ footer {
     display: flex;
     justify-content: space-between;
     align-items: end;
-}
 
-img {
-    width: 40px;
-    height: 40px;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
+    img {
+        width: 40px;
+        height: 40px;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
 
-img:hover {
-    opacity: 0.8;
-}
+    img:hover {
+        opacity: 0.8;
+    }
 
-button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    opacity: 80%;
 }
 
 .footer-contact {
