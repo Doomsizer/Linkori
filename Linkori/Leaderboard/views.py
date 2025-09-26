@@ -2,7 +2,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Case, When, Value, IntegerField, F
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-
+from .regions import CITIES
 from .models import OsuPerformance, ServerMember
 from .serializers import OsuPerformanceSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -120,3 +120,9 @@ def get_leaderboard(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_cities(request):
+    cities = [{'code': code, 'name': name} for code, name in CITIES]
+    return JsonResponse({'cities': cities}, safe=False)

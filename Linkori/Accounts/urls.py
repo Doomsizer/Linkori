@@ -8,5 +8,5 @@ urlpatterns = [
     path('discord/callback/', views.discord_callback_view, name='discord_callback'),
     path('user/', views.user_view, name='user'),
     path('regions/', views.get_regions, name='regions'),
-    path('cities/', views.get_cities, name='cities'),
+    path('cities/', views.get_cities, name='cities_by_regions'),
 ]

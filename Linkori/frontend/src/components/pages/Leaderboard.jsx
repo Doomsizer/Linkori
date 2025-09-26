@@ -9,6 +9,7 @@ const Leaderboard = () => {
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [regions, setRegions] = useState([]);
     const [cities, setCities] = useState([]);
+    const [allCities, setAllCities] = useState([]); // Новое состояние для всех городов
     const [userServers, setUserServers] = useState([]);
     const [selectedMode, setSelectedMode] = useState('osu');
     const [selectedRegion, setSelectedRegion] = useState('');
@@ -29,6 +30,23 @@ const Leaderboard = () => {
             return () => clearTimeout(timer);
         }
     }, [error]);
+
+    // Функция для загрузки всех городов
+    const fetchAllCities = useCallback(async () => {
+        try {
+            const response = await fetch('https://127.0.0.1:8000/leaderboard/cities/', {
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setAllCities(data.cities || []);
+            } else {
+                setError('Ошибка загрузки списка городов');
+            }
+        } catch (err) {
+            setError('Ошибка при загрузке списка городов');
+        }
+    }, []);
 
     const fetchRegions = useCallback(async () => {
         try {
@@ -129,12 +147,15 @@ const Leaderboard = () => {
     }, [isAuthenticated, accessToken]);
 
     useEffect(() => {
+        // Загружаем все города при монтировании компонента
+        fetchAllCities();
+
         if (isAuthenticated) {
             fetchRegions();
         }
         const initialUrl = isAuthenticated ? buildUrl() : `https://127.0.0.1:8000/leaderboard/mainboard/?page=1&page_size=25`;
         fetchLeaderboard(initialUrl);
-    }, [isAuthenticated, fetchRegions, fetchLeaderboard, selectedMode, selectedRegion, selectedCity, selectedServer]);
+    }, [isAuthenticated, fetchRegions, fetchLeaderboard, fetchAllCities, selectedMode, selectedRegion, selectedCity, selectedServer]);
 
     const handleModeChange = (e) => {
         setSelectedMode(e.target.value);
@@ -198,16 +219,24 @@ const Leaderboard = () => {
         return `https://cdn.discordapp.com/icons/${serverId}/${serverIcon}.png`;
     };
 
+    // Функция для получения названия региона по коду
+    const getRegionName = (code) => {
+        const reg = regions.find(r => r.code === code);
+        return reg ? reg.name : code || '-';
+    };
+
+    // Функция для получения названия города по коду
+    const getCityName = (code) => {
+        if (!code) return '-';
+        const city = allCities.find(c => c.code === code);
+        return city ? city.name : code;
+    };
+
     if (isRefreshing) {
         return <LoadingSpinner />;
     }
 
     const startRank = (currentPage - 1) * 25 + 1;
-
-    const getRegionName = (code) => {
-        const reg = regions.find(r => r.code === code);
-        return reg ? reg.name : code || '-';
-    };
 
     return (
         <main className="leaderboard-main">
@@ -317,11 +346,11 @@ const Leaderboard = () => {
                                     />
                                     <span className="leaderboard-nick">{entry.user.nick}</span>
                                 </td>
-                                <td className="leaderboard-pp">{entry.pp.toFixed(2)}</td>
+                                <td className="leaderboard-pp">{Math.round(entry.pp)}</td>
                                 <td className="leaderboard-global-rank">{entry.global_rank ? `#${entry.global_rank}` : '-'}</td>
                                 <td className="leaderboard-country-rank">{entry.country_rank ? `#${entry.country_rank}` : '-'}</td>
                                 <td className="leaderboard-region">{getRegionName(entry.user.region)}</td>
-                                <td className="leaderboard-city">{entry.user.cities || '-'}</td>
+                                <td className="leaderboard-city">{getCityName(entry.user.cities)}</td>
                             </tr>
                         ))}
                         </tbody>
