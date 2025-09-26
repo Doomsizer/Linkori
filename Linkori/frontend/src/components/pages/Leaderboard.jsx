@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
 import "../../styles/Leaderboard.css";
 
@@ -8,9 +9,11 @@ const Leaderboard = () => {
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [regions, setRegions] = useState([]);
     const [cities, setCities] = useState([]);
+    const [userServers, setUserServers] = useState([]);
     const [selectedMode, setSelectedMode] = useState('osu');
     const [selectedRegion, setSelectedRegion] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
+    const [selectedServer, setSelectedServer] = useState('');
     const [isServerMode, setIsServerMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -18,6 +21,7 @@ const Leaderboard = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [nextUrl, setNextUrl] = useState(null);
     const [previousUrl, setPreviousUrl] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (error) {
@@ -29,6 +33,7 @@ const Leaderboard = () => {
     const fetchRegions = useCallback(async () => {
         try {
             const response = await fetch('https://127.0.0.1:8000/accounts/regions/', {
+                credentials: 'include',
             });
             if (response.ok) {
                 const data = await response.json();
@@ -63,6 +68,25 @@ const Leaderboard = () => {
         setLoading(false);
     }, [accessToken]);
 
+    const fetchUserServers = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('https://127.0.0.1:8000/leaderboard/user-servers/', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUserServers(data.servers || data || []);
+            } else {
+                setError('Ошибка загрузки серверов');
+            }
+        } catch (err) {
+            setError('Ошибка при загрузке серверов');
+        }
+        setLoading(false);
+    }, [accessToken]);
+
     const buildUrl = (page = 1) => {
         let url = `https://127.0.0.1:8000/leaderboard/leaderboard/?page=${page}&mode=${selectedMode}`;
         if (selectedRegion) {
@@ -70,6 +94,9 @@ const Leaderboard = () => {
         }
         if (selectedCity) {
             url += `&city=${selectedCity}`;
+        }
+        if (selectedServer) {
+            url += `&server=${selectedServer}`;
         }
         return url;
     };
@@ -102,10 +129,12 @@ const Leaderboard = () => {
     }, [isAuthenticated, accessToken]);
 
     useEffect(() => {
-        fetchRegions();
+        if (isAuthenticated) {
+            fetchRegions();
+        }
         const initialUrl = isAuthenticated ? buildUrl() : `https://127.0.0.1:8000/leaderboard/mainboard/?page=1&page_size=25`;
         fetchLeaderboard(initialUrl);
-    }, [isAuthenticated, fetchRegions, fetchLeaderboard, selectedMode, selectedRegion, selectedCity]);
+    }, [isAuthenticated, fetchRegions, fetchLeaderboard, selectedMode, selectedRegion, selectedCity, selectedServer]);
 
     const handleModeChange = (e) => {
         setSelectedMode(e.target.value);
@@ -129,6 +158,11 @@ const Leaderboard = () => {
         setCurrentPage(1);
     };
 
+    const handleServerSelect = (serverId) => {
+        setSelectedServer(serverId);
+        setCurrentPage(1);
+    };
+
     const handleNextPage = () => {
         if (nextUrl) {
             fetchLeaderboard(nextUrl);
@@ -146,12 +180,22 @@ const Leaderboard = () => {
     const handleLeaderboardType = (type) => {
         if (type === 'server') {
             setIsServerMode(true);
-            setError('Серверный лидерборд пока не реализован');
+            fetchUserServers();
         } else {
             setIsServerMode(false);
+            setSelectedServer('');
             setCurrentPage(1);
             fetchLeaderboard(buildUrl(1));
         }
+    };
+
+    const toLogin = () => {
+        navigate('/login');
+    };
+
+    const getServerIconUrl = (serverIcon, serverId) => {
+        if (!serverIcon) return '/default-server-icon.png';
+        return `https://cdn.discordapp.com/icons/${serverId}/${serverIcon}.png`;
     };
 
     if (isRefreshing) {
@@ -183,13 +227,12 @@ const Leaderboard = () => {
                             <button
                                 onClick={() => handleLeaderboardType('server')}
                                 className={`leaderboard-type-button ${isServerMode ? 'active' : ''}`}
-                                disabled
                             >
                                 Серверный
                             </button>
                         </div>
                     )}
-                    {isAuthenticated && !isServerMode && (
+                    {isAuthenticated && (
                         <div className="leaderboard-filters">
                             <label className="leaderboard-label">
                                 Режим:
@@ -218,6 +261,35 @@ const Leaderboard = () => {
                                     ))}
                                 </select>
                             </label>
+                        </div>
+                    )}
+                    {isServerMode && userServers.length > 0 && (
+                        <div className="leaderboard-servers">
+                            {userServers.map((server) => (
+                                <button
+                                    key={server.server_id}
+                                    onClick={() => handleServerSelect(server.server_id)}
+                                    className={`leaderboard-server-button ${selectedServer === server.server_id ? 'active' : ''}`}
+                                >
+                                    <img
+                                        src={getServerIconUrl(server.server_icon, server.server_id)}
+                                        alt={server.server_name}
+                                        className="server-icon"
+                                        onError={(e) => { e.target.src = '/default-server-icon.png'; }}
+                                    />
+                                    <div className="server-info">
+                                        <span className="server-name">{server.server_name}</span>
+                                        <span className="server-members">{server.member_count} участников</span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                    {isServerMode && userServers.length === 0 && (
+                        <div className="leaderboard-servers">
+                            <p style={{ color: 'var(--linkori-white)', textAlign: 'center' }}>
+                                Вы не состоите ни в одном сервере или серверы не найдены
+                            </p>
                         </div>
                     )}
                     <table className="leaderboard-table">

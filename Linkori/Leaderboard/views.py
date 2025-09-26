@@ -1,10 +1,15 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Case, When, Value, IntegerField, F
 from rest_framework.decorators import api_view, permission_classes
-from .models import OsuPerformance
+from rest_framework.response import Response
+
+from .models import OsuPerformance, ServerMember
 from .serializers import OsuPerformanceSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.http import JsonResponse
+from DiscordBot.models import DiscordServer
+from Accounts.models import CustomUser
+from DiscordBot.serializers import DiscordServerSerializer
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 25
@@ -42,6 +47,26 @@ def get_mainboard(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def get_user_servers(request):
+    """
+    Получить все серверы, на которых состоит авторизованный пользователь.
+    Возвращает список серверов с server_id, server_name, server_icon, member_count
+    """
+    try:
+        user = request.user
+
+        server_memberships = ServerMember.objects.filter(user=user).select_related('server')
+
+        servers = [membership.server for membership in server_memberships]
+
+        serializer = DiscordServerSerializer(servers, many=True)
+
+        return Response(serializer.data)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_leaderboard(request):
     """
     Таблица для авторизованных пользователей. Поддерживает фильтрацию.
@@ -49,27 +74,31 @@ def get_leaderboard(request):
     - mode: режим игры (osu, taiko, fruits, mania), по умолчанию 'osu'
     - region: код региона фильтрация по региону
     - city: код города фильтрация по городу
-    - server: id сервера фильтрация по серверу (пока не реализовано)
+    - server: id сервера фильтрация по серверу
     """
     try:
         mode = request.GET.get('mode', 'osu')
-        regional_code = request.GET.get('region', None)
+        region_code = request.GET.get('region', None)
         city_code = request.GET.get('city', None)
-        server = request.GET.get('server', None)
+        server_id = request.GET.get('server', None)
 
         entries = OsuPerformance.objects.all().select_related('user')
 
         entries = entries.filter(mode=mode)
 
-        if regional_code:
-            entries = entries.filter(user__region=regional_code)
+        if server_id:
+            server_members = ServerMember.objects.filter(server__server_id=server_id).values_list('user_id', flat=True)
+
+            custom_users = CustomUser.objects.filter(id__in=server_members, osu_user__isnull=False)
+            osu_ids = custom_users.values_list('osu_user__osu__osu_id', flat=True)
+
+            entries = entries.filter(user__osu_id__in=osu_ids)
+
+        if region_code:
+            entries = entries.filter(user__region=region_code)
 
             if city_code:
                 entries = entries.filter(user__cities=city_code)
-
-        # TODO: Фильтрация по серверу (реализовать позже)
-        # if server:
-        #     entries = entries.filter(...)
 
         entries = entries.annotate(
             sort_priority=Case(

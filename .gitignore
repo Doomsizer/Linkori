@@ -1,7 +1,6 @@
 /.venv/*
 /.idea/*
 /Linkori/frontend/node_modules/*
-/Linkori/commands
 .gitingore
 Linkori/frontend/package-lock.json
 Linkori/staticfiles/*

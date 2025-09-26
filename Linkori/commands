@@ -1,0 +1,18 @@
+#run dev server on https:
+cd Linkori
+python manage.py runserver_plus --cert-file certs/certificate.pem --key-file certs/private.key 0.0.0.0:8000
+
+#локальный redis (в отдельном терминале)
+redis-server
+
+#запуск Celery Worker (для обработки задач) в отдельном терминале (требует запущенный redis на локальной машине):
+cd Linkori
+celery -A Linkori worker --loglevel=info --pool=solo
+
+#запуск Celery Beat (для периодических задач) этот после Worker'а запускать тоже в отдельном терминале:
+cd Linkori
+celery -A Linkori beat --loglevel=info
+
+#запуск асинхронного обновления лидерборда в отдельном терминале
+cd Linkori
+python manage.py run_osu_api_manager
