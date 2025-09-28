@@ -13,3 +13,4 @@ migrations/
 celerybeat-schedule.bak
 celerybeat-schedule.dat
 celerybeat-schedule.dir
+Linkori/generate_cert.py

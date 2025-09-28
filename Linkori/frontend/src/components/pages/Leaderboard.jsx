@@ -9,7 +9,7 @@ const Leaderboard = () => {
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [regions, setRegions] = useState([]);
     const [cities, setCities] = useState([]);
-    const [allCities, setAllCities] = useState([]); // Новое состояние для всех городов
+    const [allCities, setAllCities] = useState([]);
     const [userServers, setUserServers] = useState([]);
     const [selectedMode, setSelectedMode] = useState('osu');
     const [selectedRegion, setSelectedRegion] = useState('');
@@ -31,28 +31,11 @@ const Leaderboard = () => {
         }
     }, [error]);
 
-    // Функция для загрузки всех городов
-    const fetchAllCities = useCallback(async () => {
-        try {
-            const response = await fetch('https://127.0.0.1:8000/leaderboard/cities/', {
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setAllCities(data.cities || []);
-            } else {
-                setError('Ошибка загрузки списка городов');
-            }
-        } catch (err) {
-            setError('Ошибка при загрузке списка городов');
-        }
-    }, []);
-
     const fetchRegions = useCallback(async () => {
         try {
             const response = await fetch('https://127.0.0.1:8000/accounts/regions/', {
-                credentials: 'include',
             });
+            console.log("regions")
             if (response.ok) {
                 const data = await response.json();
                 setRegions(data.regions || []);
@@ -61,6 +44,22 @@ const Leaderboard = () => {
             }
         } catch (err) {
             setError('Ошибка при загрузке регионов');
+        }
+    }, []);
+
+    const fetchAllCities = useCallback(async () => {
+        try {
+            const response = await fetch('https://127.0.0.1:8000/leaderboard/cities/', {
+            });
+            console.log("cities")
+            if (response.ok) {
+                const data = await response.json();
+                setAllCities(data.cities || []);
+            } else {
+                setError('Ошибка загрузки списка городов');
+            }
+        } catch (err) {
+            setError('Ошибка при загрузке списка городов');
         }
     }, []);
 
@@ -147,12 +146,9 @@ const Leaderboard = () => {
     }, [isAuthenticated, accessToken]);
 
     useEffect(() => {
-        // Загружаем все города при монтировании компонента
         fetchAllCities();
+        fetchRegions();
 
-        if (isAuthenticated) {
-            fetchRegions();
-        }
         const initialUrl = isAuthenticated ? buildUrl() : `https://127.0.0.1:8000/leaderboard/mainboard/?page=1&page_size=25`;
         fetchLeaderboard(initialUrl);
     }, [isAuthenticated, fetchRegions, fetchLeaderboard, fetchAllCities, selectedMode, selectedRegion, selectedCity, selectedServer]);
@@ -219,13 +215,11 @@ const Leaderboard = () => {
         return `https://cdn.discordapp.com/icons/${serverId}/${serverIcon}.png`;
     };
 
-    // Функция для получения названия региона по коду
     const getRegionName = (code) => {
         const reg = regions.find(r => r.code === code);
         return reg ? reg.name : code || '-';
     };
 
-    // Функция для получения названия города по коду
     const getCityName = (code) => {
         if (!code) return '-';
         const city = allCities.find(c => c.code === code);
@@ -328,7 +322,7 @@ const Leaderboard = () => {
                             <th>Игрок</th>
                             <th>PP</th>
                             <th>Глобальный ранг</th>
-                            <th>Страна ранг</th>
+                            <th>Ранг в стране</th>
                             <th>Регион</th>
                             <th>Город</th>
                         </tr>
@@ -338,13 +332,15 @@ const Leaderboard = () => {
                             <tr key={entry.user.osu_id || index}>
                                 <td className="leaderboard-rank">{startRank + index}</td>
                                 <td className="leaderboard-player">
-                                    <img
-                                        src={entry.user.avatar_url}
-                                        alt={entry.user.nick}
-                                        className="leaderboard-avatar"
-                                        onError={(e) => { e.target.src = '/default-avatar.png'; }}
-                                    />
-                                    <span className="leaderboard-nick">{entry.user.nick}</span>
+                                    <a className="leaderboard-player-link" href={`https://osu.ppy.sh/users/${entry.user.osu_id}`}>
+                                        <img
+                                            src={entry.user.avatar_url}
+                                            alt={entry.user.nick}
+                                            className="leaderboard-avatar"
+                                            onError={(e) => { e.target.src = '/default-avatar.png'; }}
+                                        />
+                                        <span className="leaderboard-nick">{entry.user.nick}</span>
+                                    </a>
                                 </td>
                                 <td className="leaderboard-pp">{Math.round(entry.pp)}</td>
                                 <td className="leaderboard-global-rank">{entry.global_rank ? `#${entry.global_rank}` : '-'}</td>

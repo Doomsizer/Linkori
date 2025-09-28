@@ -1,0 +1,241 @@
+.main-page {
+    padding: 50px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+}
+
+.main-hero {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 60px;
+    padding: 40px;
+    background-color: rgba(119, 133, 204, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--linkori-lavander);
+}
+
+.main-hero-image-container {
+    position: relative;
+    width: 40%;
+    height: auto;
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.main-hero-image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px var(--linkori-pink));
+    mask-image: radial-gradient(circle, white 60%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle, white 60%, transparent 100%);
+}
+
+.main-hero-content {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding-left: 40px;
+}
+
+.main-hero-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--osu-pink);
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.main-hero-description {
+    color: var(--linkori-white);
+    opacity: 0.9;
+    margin: 0;
+}
+
+.main-hero-explanation {
+    font-size: 18px;
+    color: var(--linkori-yellow);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.main-hero-button {
+    background: linear-gradient(135deg, var(--linkori-lavander), var(--discord-blue));
+    color: var(--linkori-white);
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.main-hero-button:hover {
+    background: linear-gradient(135deg, var(--discord-blue), var(--osu-pink));
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.main-hero-button-login {
+    background: linear-gradient(135deg, var(--linkori-red), var(--osu-pink));
+}
+
+.main-hero-button-login:hover {
+    background: linear-gradient(135deg, var(--osu-pink), var(--linkori-yellow));
+}
+
+.main-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.main-info {
+    width: 100%;
+    max-width: 1000px;
+    padding: 40px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--linkori-pink);
+}
+
+.main-info-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--discord-blue);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.main-info-text {
+    font-size: 16px;
+    color: var(--linkori-white);
+    line-height: 1.6;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+@media (max-width: 1024px) {
+    .main-hero {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        padding: 30px;
+    }
+
+    .main-hero-image-container {
+        width: 80%;
+    }
+
+    .main-hero-content {
+        width: 100%;
+        padding-left: 0;
+        align-items: center;
+        text-align: center;
+    }
+
+    .main-hero-title {
+        font-size: 32px;
+    }
+
+    .main-hero-description,
+    .main-hero-explanation {
+        font-size: 18px;
+    }
+
+    .main-hero-button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .main-info {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-page {
+        padding: 30px;
+    }
+
+    .main-hero {
+        padding: 20px;
+        margin-bottom: 40px;
+    }
+
+    .main-hero-image-container {
+        width: 100%;
+    }
+
+    .main-hero-title {
+        font-size: 28px;
+    }
+
+    .main-hero-description,
+    .main-hero-explanation {
+        font-size: 16px;
+    }
+
+    .main-info {
+        padding: 20px;
+    }
+
+    .main-info-title {
+        font-size: 24px;
+    }
+
+    .main-info-text {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-page {
+        padding: 20px;
+    }
+
+    .main-hero {
+        padding: 15px;
+    }
+
+    .main-hero-title {
+        font-size: 24px;
+    }
+
+    .main-hero-description,
+    .main-hero-explanation {
+        font-size: 14px;
+    }
+
+    .main-hero-button {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+
+    .main-info {
+        padding: 15px;
+    }
+
+    .main-info-title {
+        font-size: 20px;
+    }
+
+    .main-info-text {
+        font-size: 13px;
+    }
+}

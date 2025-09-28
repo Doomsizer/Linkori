@@ -78,6 +78,13 @@
     margin-right: 2px;
 }
 
+.leaderboard-player-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .leaderboard-player {
     display: flex;
     align-items: center;
@@ -361,6 +368,10 @@
 
     .leaderboard-table th {
         padding: 10px 4px;
+    }
+
+    .leaderboard-player-link {
+
     }
 
     .leaderboard-player {
