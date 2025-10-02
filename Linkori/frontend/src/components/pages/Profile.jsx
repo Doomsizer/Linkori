@@ -4,6 +4,8 @@ import { loginWithDiscord, loginWithOsu } from '../services/AuthService';
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
 import "../../styles/Profile.css";
+import discordLogo from "../../media/discord.svg";
+import osuLogo from "../../media/osu.svg";
 
 const Profile = () => {
     const { accessToken, logout } = useAuth();
@@ -380,13 +382,13 @@ const Profile = () => {
                     </div>
 
                     {!hasDiscord && (
-                        <button className="profile-link-button" onClick={handleLinkDiscord} disabled={loading}>
-                            Привязать Discord
+                        <button className="profile-link-button discord" onClick={handleLinkDiscord} disabled={loading}>
+                            Привязать<img src={discordLogo} alt="" height="30px" width="30px"/>
                         </button>
                     )}
                     {!hasOsu && (
-                        <button className="profile-link-button" onClick={handleLinkOsu} disabled={loading}>
-                            Привязать osu!
+                        <button className="profile-link-button osu" onClick={handleLinkOsu} disabled={loading}>
+                            Привязать<img src={osuLogo} alt="" width="30px" height="30px"/>
                         </button>
                     )}
                     <button className="profile-logout-button" onClick={logout} disabled={loading}>

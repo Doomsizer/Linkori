@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { loginWithDiscord, loginWithOsu, handleDiscordCallback, handleOsuCallback } from '../services/AuthService';
+import discordLogo from "../../media/discord.svg"
+import osuLogo from "../../media/osu.svg"
 import '../../styles/Login.css';
 
 const Login = () => {
@@ -86,11 +88,11 @@ const Login = () => {
                 в настройках osu! или discord.
             </p>
             {error && <span className="login-error-message">{error}</span>}
-            <button className="login-button" onClick={handleDiscordLogin}>
-                Войти через Discord
+            <button className="login-button discord" onClick={handleDiscordLogin}>
+                Войти через<img src={discordLogo} alt="" height="40px" width="40px"/>
             </button>
-            <button className="login-button" onClick={handleOsuLogin}>
-                Войти через osu!
+            <button className="login-button osu" onClick={handleOsuLogin}>
+                Войти через<img src={osuLogo} alt="" width="40px" height="40px"/>
             </button>
         </main>
     );
