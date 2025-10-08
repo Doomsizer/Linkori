@@ -26,15 +26,17 @@ class CustomJWTMiddleware:
                 logger.info(f"Authenticated user {user.identifier} via JWT")
 
             except (InvalidToken, TokenError) as e:
-                logger.warning(f"JWT authentication failed: {str(e)}")
+                logger.info(f"JWT authentication failed: {str(e)}")
                 request.user = AnonymousUser()
 
             except Exception as e:
                 logger.warning(f"Authentication failed: {str(e)}")
                 request.user = AnonymousUser()
 
+        elif request.user.is_staff:
+            logger.info(f"Authenticated admin user {request.user} via admin panel")
+
         else:
-            logger.debug("No Bearer token in headers, using AnonymousUser")
             request.user = AnonymousUser()
 
         response = self.get_response(request)

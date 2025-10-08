@@ -4,25 +4,30 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.utils import timezone
 from datetime import timedelta
+from Accounts.models import OsuUsers, UnauthorizedOsuUsers
 from .models import OsuApiApplication, OsuPerformance
-from Accounts.models import CustomUser, OsuUsers, UnauthorizedOsuUsers
 
 logger = logging.getLogger(__name__)
 
+OSU_RETRY_ATTEMPTS = 12
+OSU_RETRY_WAIT_BASE = 5
+OSU_RATE_LIMIT = 60
+MAX_WORKERS = 8
+
 class OsuApiService:
+    session = requests.Session()
+
     @staticmethod
-    def get_active_api_application(max_retries=12, wait_time=5):
-        """
-        Выбирает активное API-приложение с ротацией и ожиданием.
-        Если нет доступного — ждёт и ретраит.
-        """
-        for attempt in range(max_retries):
+    def get_active_api_application():
+        for attempt in range(OSU_RETRY_ATTEMPTS):
             applications = OsuApiApplication.objects.filter(is_active=True).order_by('requests_count')
             for app in applications:
+                app.reset_errors_if_needed()
                 if app.can_make_request():
                     return app
-            if attempt < max_retries - 1:
-                logger.warning(f"No available API app, waiting {wait_time}s (attempt {attempt+1}/{max_retries})")
+            if attempt < OSU_RETRY_ATTEMPTS - 1:
+                wait_time = OSU_RETRY_WAIT_BASE * (2 ** attempt)
+                logger.warning(f"No available API app, waiting {wait_time}s (attempt {attempt+1}/{OSU_RETRY_ATTEMPTS})")
                 time.sleep(wait_time)
         logger.error("All API applications exhausted after retries")
         return None
@@ -41,6 +46,10 @@ class OsuApiService:
             app = OsuApiService.get_active_api_application()
             if app is None:
                 return None
+
+        now = timezone.now()
+        if app.access_token and app.token_expires_at and app.token_expires_at > now + timedelta(minutes=5):
+            return app.access_token
 
         if not app.can_make_request():
             logger.warning(f"Cannot get token for {app.name}: limit reached")
@@ -61,19 +70,21 @@ class OsuApiService:
         }
 
         try:
-            response = requests.post(token_url, data=data, timeout=10)
+            response = OsuApiService.session.post(token_url, data=data, timeout=10)
             if response.status_code != 200:
                 error_msg = response.json().get('error', 'Unknown error')
+                logger.error(f"Failed to get osu! token for {app.name}: {error_msg}")
                 if error_msg == 'invalid_client':
                     app.increment_error()
-                logger.error(f"Failed to get osu! token: {response.text}")
                 return None
-            token = response.json()['access_token']
-            time.sleep(1)
-            return token
+            data = response.json()
+            app.access_token = data['access_token']
+            app.token_expires_at = now + timedelta(seconds=data['expires_in'])
+            app.save()
+            return app.access_token
         except requests.RequestException as e:
+            logger.error(f"Request error getting token for {app.name}: {str(e)}")
             app.increment_error()
-            logger.error(f"Request error during osu! token fetch: {str(e)}")
             return None
 
     @staticmethod
@@ -81,10 +92,11 @@ class OsuApiService:
         if app is None:
             app = OsuApiService.get_active_api_application()
             if app is None:
+                logger.warning("No active app for user data fetch")
                 return None
 
         if not app.can_make_request():
-            logger.warning(f"Cannot get data for {user_id}: limit reached")
+            logger.warning(f"Cannot get data for user {user_id} with {app.name}: limit reached")
             time.sleep(1)
             return None
 
@@ -96,6 +108,7 @@ class OsuApiService:
             token = OsuApiService.get_client_credentials_token(app)
 
         if token is None:
+            logger.warning(f"No token for user {user_id} with {app.name}")
             return None
 
         user_url = f'https://osu.ppy.sh/api/v2/users/{user_id}/{mode}'
@@ -103,47 +116,43 @@ class OsuApiService:
         try:
             success = app.increment_counter()
             if not success:
+                logger.warning(f"Cannot increment counter for {app.name} for user {user_id}")
                 time.sleep(1)
                 return None
 
-            user_response = requests.get(
+            user_response = OsuApiService.session.get(
                 user_url,
                 headers={'Authorization': f'Bearer {token}'},
                 timeout=10
             )
-            time.sleep(1)
 
             if user_response.status_code == 404:
                 logger.warning(f"User {user_id} not found (404)")
                 return None
             elif user_response.status_code != 200:
                 error_msg = user_response.json().get('error', 'Unknown error') if user_response.text else 'No response'
+                logger.error(f"Failed to get user data for {user_id}: HTTP {user_response.status_code}, {error_msg}")
                 if error_msg == 'invalid_client':
                     app.increment_error()
-                logger.error(f"Failed to get osu! user data: HTTP {user_response.status_code}, {error_msg}")
                 return None
 
             return user_response.json()
         except requests.RequestException as e:
+            logger.error(f"Request error for user {user_id}: {str(e)}")
             app.increment_error()
-            logger.error(f"Request error during osu! user data fetch: {str(e)}")
             return None
 
     @classmethod
     def update_user_performance(cls, user, app=None, mode="osu"):
+        logger.debug(f"Updating performance for user {user.osu_id} mode {mode} with app {app.name if app else 'None'}")
         osu_data = cls.get_user_data(user.osu_id, app, mode=mode)
         if osu_data is None:
-            logger.error(f"Failed to get osu! data for user {user.osu_id} in mode {mode}")
+            logger.warning(f"Failed to get data for user {user.osu_id} mode {mode}")
             return None
 
         statistics = osu_data.get('statistics', {})
 
         try:
-            if mode == 'osu':
-                user.nick = osu_data.get('username', user.nick)
-                user.avatar_url = osu_data.get('avatar_url')
-                user.save()
-
             performance, created = OsuPerformance.objects.get_or_create(
                 user=user,
                 mode=mode,
@@ -166,35 +175,63 @@ class OsuApiService:
                 performance.level = statistics.get('level', {}).get('current', 0)
                 performance.save()
 
-            logger.info(f"Updated performance for user {user.osu_id} in mode {mode}: {performance.pp}pp")
+            logger.info(f"Updated performance for {user.osu_id} mode {mode}: {performance.pp}pp")
             return performance
         except Exception as e:
-            logger.error(f"Error updating performance for user {user.osu_id}: {str(e)}")
+            logger.error(f"Error saving performance for {user.osu_id} mode {mode}: {str(e)}")
             return None
 
     @classmethod
-    def update_all_modes_for_user(cls, user, app=None):
+    def update_all_modes_for_user(cls, user):
+        logger.info(f"Starting all modes update for user {user.osu_id}")
+        app = cls.get_active_api_application()
+        if app is None:
+            logger.warning(f"No app for user {user.osu_id}")
+            return {}
+
+        osu_data = cls.get_user_data(user.osu_id, app, mode='osu')
+        if osu_data is None:
+            logger.warning(f"Failed to get base data for user {user.osu_id}")
+            return {}
+
+        try:
+            user.nick = osu_data.get('username', user.nick)
+            user.avatar_url = osu_data.get('avatar_url')
+            user.save()
+            logger.debug(f"Updated nick/avatar for {user.osu_id}")
+        except Exception as e:
+            logger.error(f"Error saving user {user.osu_id}: {str(e)}")
+
         results = {}
         modes = ['osu', 'taiko', 'fruits', 'mania']
 
         for mode in modes:
             try:
-                performance = cls.update_user_performance(user, None, mode)
+                performance = cls.update_user_performance(user, app, mode)
                 results[mode] = {
                     'success': performance is not None,
                     'pp': performance.pp if performance else 0
                 }
             except Exception as e:
-                logger.error(f"Error updating {mode} for user {user.nick}: {str(e)}")
+                logger.error(f"Error updating mode {mode} for {user.osu_id}: {str(e)}")
                 results[mode] = {'success': False, 'error': str(e)}
 
         return results
 
     @classmethod
+    def _update_single_user(cls, user):
+        try:
+            cls.update_all_modes_for_user(user)
+            return 1
+        except Exception as e:
+            logger.error(f"Error updating single user {user.osu_id}: {str(e)}")
+            return 0
+
+    @classmethod
     def update_all_users_performance(cls):
         apps = list(OsuApiApplication.objects.filter(is_active=True))
         if not apps:
-            logger.error("No active apps")
+            logger.error("No active apps for parsing user stats")
             return 0
 
         users = list(UnauthorizedOsuUsers.objects.all())
@@ -202,48 +239,30 @@ class OsuApiService:
             logger.info("No users to update")
             return 0
 
-        user_groups = [[] for _ in apps]
-        for i, user in enumerate(users):
-            user_groups[i % len(apps)].append(user)
+        logger.info(f"Starting update for {len(users)} users with {len(apps)} apps")
 
+        num_workers = min(MAX_WORKERS, len(apps) * 2)
         update_count = 0
-        with ThreadPoolExecutor(max_workers=len(apps)) as executor:
-            futures = {executor.submit(cls._update_group_sequential, group, app): app for group, app in zip(user_groups, apps)}
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            futures = [executor.submit(cls._update_single_user, user) for user in users]
             for future in as_completed(futures):
-                app = futures[future]
                 try:
-                    group_count = future.result()
-                    update_count += group_count
-                    logger.info(f"App {app.name} updated {group_count} users")
+                    count = future.result()
+                    update_count += count
                 except Exception as e:
-                    logger.error(f"Error in app {app.name}: {str(e)}")
+                    logger.error(f"Future error: {str(e)}")
 
+        logger.info(f"Total updated users: {update_count}")
         return update_count
 
     @classmethod
-    def _update_group_sequential(cls, users, app):
-        """Sequential update for one app's users"""
-        count = 0
-        for user in users:
-            try:
-                cls.update_all_modes_for_user(user, app)
-                count += 1
-            except Exception as e:
-                logger.error(f"Error updating user {user.osu_id} on app {app.name}: {str(e)}")
-        return count
-
-    @classmethod
     def update_from_osu_ids_list(cls, osu_ids, modes=['osu']):
-        """
-        Обновляет по списку osu_id с ротацией и ожиданием.
-        Создаёт UnauthorizedOsuUsers если нет.
-        """
         update_count = 0
         for osu_id in osu_ids:
             try:
                 user_obj, created = UnauthorizedOsuUsers.objects.get_or_create(
                     osu_id=osu_id,
-                    defaults={'nick': osu_id}
+                    defaults={'nick': str(osu_id)}
                 )
                 for mode in modes:
                     cls.update_user_performance(user_obj, None, mode)
@@ -251,5 +270,4 @@ class OsuApiService:
             except Exception as e:
                 logger.error(f"Error updating from ID {osu_id}: {str(e)}")
 
-        logger.info(f"Updated {update_count} users from list")
         return update_count

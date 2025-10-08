@@ -102,9 +102,10 @@ DATABASES = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
     'Accounts.backends.CustomAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
+
 
 AUTH_PASSWORD_VALIDATORS = []
 
