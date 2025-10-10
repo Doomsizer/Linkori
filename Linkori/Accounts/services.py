@@ -76,14 +76,6 @@ def handle_osu_callback(request):
             'access': str(refresh.access_token),
             'status': 'success'
         })
-        response.set_cookie(
-            'refresh_token',
-            str(refresh),
-            httponly=True,
-            secure=True,
-            samesite='Lax',
-            max_age=7*24*3600
-        )
         logger.info(f"Set refresh_token cookie for user {user.identifier}")
         return response
 

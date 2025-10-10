@@ -1,5 +1,6 @@
 import json
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
+from .permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.conf import settings
 from django.http import JsonResponse

@@ -1,4 +1,5 @@
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
+from Accounts.permissions import IsLinked, IsAuthenticated
 from django.db.models import Case, When, Value, IntegerField, F
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -10,6 +11,9 @@ from django.http import JsonResponse
 from DiscordBot.models import DiscordServer
 from Accounts.models import CustomUser
 from DiscordBot.serializers import DiscordServerSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 25
@@ -66,7 +70,7 @@ def get_user_servers(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsLinked])
 def get_leaderboard(request):
     """
     Таблица для авторизованных пользователей. Поддерживает фильтрацию.
@@ -76,6 +80,7 @@ def get_leaderboard(request):
     - city: код города фильтрация по городу
     - server: id сервера фильтрация по серверу
     """
+    logger.error(request.user.is_linked)
     try:
         mode = request.GET.get('mode', 'osu')
         region_code = request.GET.get('region', None)
