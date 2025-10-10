@@ -16,5 +16,3 @@ celery -A Linkori beat --loglevel=info
 #запуск асинхронного обновления лидерборда в отдельном терминале
 cd Linkori
 python manage.py run_osu_api_manager
-
-#тест того, что git засчитывает мне contribution

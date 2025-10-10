@@ -14,9 +14,71 @@ class DiscordUserSerializer(serializers.ModelSerializer):
         fields = ['discord_id', 'nick', 'display_name', 'avatar']
 
 class UnauthorizedOsuUsersSerializer(serializers.ModelSerializer):
+    nick = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
+
     class Meta:
         model = UnauthorizedOsuUsers
         fields = ['osu_id', 'nick', 'avatar_url', 'region', 'cities']
+
+    def get_nick(self, obj):
+        custom_user = self._get_custom_user(obj)
+        if custom_user:
+            if custom_user.nick_source == 'osu' and custom_user.osu_user:
+                return obj.nick
+            elif custom_user.nick_source == 'discord_username' and custom_user.discord_user:
+                return custom_user.discord_user.nick
+            elif custom_user.nick_source == 'discord_display_name' and custom_user.discord_user:
+                return custom_user.discord_user.display_name
+            elif not custom_user.nick_source:
+                if custom_user.osu_user and custom_user.osu_user.osu.nick:
+                    return custom_user.osu_user.osu.nick
+                elif custom_user.discord_user and custom_user.discord_user.nick:
+                    return custom_user.discord_user.nick
+                return None
+        return obj.nick
+
+    def get_avatar_url(self, obj):
+        custom_user = self._get_custom_user(obj)
+        if custom_user:
+            if custom_user.avatar_source == 'osu' and custom_user.osu_user:
+                avatar_url = obj.avatar_url
+                return self._validate_osu_avatar(avatar_url)
+            elif custom_user.avatar_source == 'discord' and custom_user.discord_user:
+                return self._validate_discord_avatar(custom_user.discord_user)
+            elif not custom_user.avatar_source:
+                if custom_user.osu_user and custom_user.osu_user.osu.avatar_url:
+                    return self._validate_osu_avatar(custom_user.osu_user.osu.avatar_url)
+                elif custom_user.discord_user and custom_user.discord_user.avatar:
+                    return self._validate_discord_avatar(custom_user.discord_user)
+                return None
+            return None
+        return self._validate_osu_avatar(obj.avatar_url)
+
+    def _get_custom_user(self, obj):
+        if hasattr(obj, 'tokens') and obj.tokens:
+            return obj.tokens.user
+        return None
+
+    def _validate_osu_avatar(self, avatar_url):
+        if not avatar_url:
+            return None
+        parsed_url = urllib.parse.urlparse(avatar_url)
+        if not (parsed_url.scheme in ['http', 'https'] and
+                parsed_url.netloc in ['a.ppy.sh', 's.ppy.sh']):
+            return None
+        full_path = parsed_url.path + ('?' + parsed_url.query if parsed_url.query else '')
+        if not re.search(r'\.(png|jpg|jpeg|gif)', full_path, re.IGNORECASE):
+            return None
+        return avatar_url
+
+    def _validate_discord_avatar(self, discord_user):
+        avatar = discord_user.avatar
+        if not avatar or len(avatar) < 2:
+            return None
+        ext = '.gif' if avatar.startswith('a_') else '.png'
+        discord_avatar_url = f"https://cdn.discordapp.com/avatars/{discord_user.discord_id}/{avatar}{ext}?size=128"
+        return discord_avatar_url
 
 class OsuUserSerializer(serializers.ModelSerializer):
     osu = UnauthorizedOsuUsersSerializer(read_only=True)
