@@ -35,7 +35,6 @@ const Leaderboard = () => {
         try {
             const response = await fetch('https://127.0.0.1:8000/accounts/regions/', {
             });
-            console.log("regions")
             if (response.ok) {
                 const data = await response.json();
                 setRegions(data.regions || []);
@@ -51,7 +50,6 @@ const Leaderboard = () => {
         try {
             const response = await fetch('https://127.0.0.1:8000/leaderboard/cities/', {
             });
-            console.log("cities")
             if (response.ok) {
                 const data = await response.json();
                 setAllCities(data.cities || []);
@@ -337,10 +335,10 @@ const Leaderboard = () => {
                                 <td className="leaderboard-player">
                                     <a className="leaderboard-player-link" href={`https://osu.ppy.sh/users/${entry.user.osu_id}`}>
                                         <img
-                                            src={entry.user.avatar_url}
+                                            src={entry.user.avatar_url || 'https://osu.ppy.sh/images/layout/avatar-guest@2x.png'}
                                             alt={entry.user.nick}
                                             className="leaderboard-avatar"
-                                            onError={(e) => { e.target.src = '/default-avatar.png'; }}
+                                            onError={(e) => { e.target.src = 'https://osu.ppy.sh/images/layout/avatar-guest@2x.png'; }}
                                         />
                                         <span className="leaderboard-nick">{entry.user.nick}</span>
                                     </a>
