@@ -5,7 +5,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import "../../styles/Leaderboard.css";
 
 const Leaderboard = () => {
-    const { isAuthenticated, accessToken, isRefreshing } = useAuth();
+    const { isAuthenticated, accessToken, isRefreshing, isLinked } = useAuth();
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [regions, setRegions] = useState([]);
     const [cities, setCities] = useState([]);
@@ -121,7 +121,7 @@ const Leaderboard = () => {
         setError(null);
 
         try {
-            const headers = isAuthenticated ? { Authorization: `Bearer ${accessToken}` } : {};
+            const headers = isAuthenticated && isLinked ? { Authorization: `Bearer ${accessToken}` } : {};
             const response = await fetch(url, {
                 headers,
                 credentials: 'include',
@@ -141,15 +141,15 @@ const Leaderboard = () => {
             setError('Ошибка при загрузке лидерборда');
         }
         setLoading(false);
-    }, [isAuthenticated, accessToken]);
+    }, [isAuthenticated, isLinked, accessToken]);
 
     useEffect(() => {
         fetchAllCities();
         fetchRegions();
 
-        const initialUrl = isAuthenticated ? buildUrl() : `https://127.0.0.1:8000/leaderboard/mainboard/?page=1&page_size=25`;
+        const initialUrl = (isAuthenticated && isLinked) ? buildUrl() : `https://127.0.0.1:8000/leaderboard/mainboard/?page=1&page_size=25`;
         fetchLeaderboard(initialUrl);
-    }, [isAuthenticated, fetchRegions, fetchLeaderboard, fetchAllCities, selectedMode, selectedRegion, selectedCity, selectedServer]);
+    }, [isAuthenticated, isLinked, fetchRegions, fetchLeaderboard, fetchAllCities, selectedMode, selectedRegion, selectedCity, selectedServer]);
 
     const handleModeChange = (e) => {
         setSelectedMode(e.target.value);
@@ -204,10 +204,6 @@ const Leaderboard = () => {
         }
     };
 
-    const toLogin = () => {
-        navigate('/login');
-    };
-
     const getServerIconUrl = (serverIcon, serverId) => {
         if (!serverIcon) return '/default-server-icon.png';
         return `https://cdn.discordapp.com/icons/${serverId}/${serverIcon}.png`;
@@ -237,7 +233,7 @@ const Leaderboard = () => {
                 <LoadingSpinner />
             ) : (
                 <>
-                    {isAuthenticated && (
+                    {isAuthenticated && isLinked && (
                         <div className="leaderboard-type-buttons">
                             <button
                                 onClick={() => handleLeaderboardType('usual')}
@@ -253,7 +249,17 @@ const Leaderboard = () => {
                             </button>
                         </div>
                     )}
-                    {isAuthenticated && (
+
+                    {isAuthenticated && !isLinked && (
+                        <div className="leaderboard-main-error">
+                            <p style={{ color: 'var(--linkori-white)', textAlign: 'center' }}>
+                                Вы вошли только при помощи одного сервиса.
+                                Перейдите в свой профиль и привяжите второй сервис для открытия фильтрации лидербордов
+                            </p>
+                        </div>
+                    )}
+
+                    {isAuthenticated && isLinked && !isServerMode && (
                         <div className="leaderboard-filters">
                             <label className="leaderboard-label">
                                 Режим:
@@ -284,7 +290,8 @@ const Leaderboard = () => {
                             </label>
                         </div>
                     )}
-                    {isServerMode && userServers.length > 0 && (
+
+                    {isServerMode && isAuthenticated && isLinked && userServers.length > 0 && (
                         <div className="leaderboard-servers">
                             {userServers.map((server) => (
                                 <button
@@ -306,8 +313,9 @@ const Leaderboard = () => {
                             ))}
                         </div>
                     )}
-                    {isServerMode && userServers.length === 0 && (
-                        <div className="leaderboard-servers">
+
+                    {isServerMode && isAuthenticated && isLinked && userServers.length === 0 && (
+                        <div className="leaderboard-servers-error">
                             <p style={{ color: 'var(--linkori-white)', textAlign: 'center' }}>
                                 Вы не были найдены ни на одном из наших серверов. Если вы недавно вступили в сервер,
                                 на котором есть бот Linkori - выйдите из аккаунта

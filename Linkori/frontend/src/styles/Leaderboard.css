@@ -263,7 +263,29 @@
     cursor: not-allowed;
 }
 
+.leaderboard-servers-error {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 25px;
+    justify-content: center;
+    width: 100%;
+    max-width: 1000px;
+    padding: 20px;
+    background-color: rgba(119, 133, 204, 0.1);
+    border-radius: 10px;
+    border: 1px solid var(--linkori-lavander);
+}
+
 .leaderboard-servers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+}
+
+.leaderboard-main-error {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -418,6 +440,7 @@
     }
 
     .leaderboard-servers {
+        display: flex;
         flex-direction: column;
         align-items: center;
         gap: 10px;

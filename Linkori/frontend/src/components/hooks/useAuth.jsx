@@ -12,6 +12,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || null);
+    const [isLinked, setIsLinked] = useState(false)
     const [isAuthenticated, setIsAuthenticated] = useState(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -34,28 +35,38 @@ export const AuthProvider = ({ children }) => {
 
     const verifyToken = useCallback(async (token) => {
         if (!token || token.split('.').length !== 3) {
-            return false;
+            return { isValid: false };
         }
         try {
-            await instance.post('/api/token/verify/', { token });
-            return true;
+            const response = await instance.post('/api/token/verify/', {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            return {
+                isValid: true,
+                isLinked: response.data.is_linked
+            };
         } catch (error) {
-            return false;
+            return { isValid: false };
         }
     }, []);
 
     useEffect(() => {
         const checkAuth = async () => {
             if (accessToken) {
-                const isValid = await verifyToken(accessToken);
-                if (isValid) {
+                const result = await verifyToken(accessToken);
+                if (result.isValid) {
                     setIsAuthenticated(true);
+                    setIsLinked(result.isLinked);
                 } else {
+                    setIsLinked(false);
                     setIsRefreshing(true);
                     const newToken = await refreshAccessToken(setTokens, logout);
                     setIsAuthenticated(!!newToken);
                 }
             } else {
+                setIsLinked(false);
                 setIsAuthenticated(false);
             }
         };
@@ -66,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     return (
         <AuthContext.Provider value={{
             accessToken,
+            isLinked,
             isAuthenticated,
             isRefreshing,
             setTokens,

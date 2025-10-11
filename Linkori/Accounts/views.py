@@ -4,6 +4,8 @@ from .permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.conf import settings
 from django.http import JsonResponse
+from rest_framework.response import Response
+from rest_framework import status
 import logging
 from django.shortcuts import redirect
 from Leaderboard.regions import REGIONS, CITIES, LINKED
@@ -141,3 +143,38 @@ def get_cities(request):
             code = CITY_CODE_MAP[name]
             cities.append({'code': code, 'name': name})
     return JsonResponse({'cities': cities}, safe=False)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def custom_token_verify_view(request):
+    try:
+        authenticator = JWTAuthentication()
+        header = authenticator.get_header(request)
+
+        if header is None:
+            return Response(
+                {"detail": "Токен не предоставлен"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        raw_token = authenticator.get_raw_token(header)
+        validated_token = authenticator.get_validated_token(raw_token)
+        user = authenticator.get_user(validated_token)
+
+        if not user.is_active:
+            return Response(
+                {"detail": "Пользователь неактивен"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        return Response({
+            "detail": "Токен валиден",
+            "is_linked": user.is_linked,
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"detail": "Токен невалиден или истек"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
