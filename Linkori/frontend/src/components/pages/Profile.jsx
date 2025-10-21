@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { loginWithDiscord, loginWithOsu } from '../services/AuthService';
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
-import "../../styles/Profile.css";
+import styles from "../../styles/Profile.module.css";
 import discordLogo from "../../media/discord.svg";
 import osuLogo from "../../media/osu.svg";
 
@@ -295,7 +295,7 @@ const Profile = () => {
             <>
                 <h2>Профиль</h2>
                 <span>Пожалуйста, войдите в систему.</span>
-                <button className="profile-toLogin-button" onClick={toLogin}>Войти</button>
+                <button className={styles.toLoginButton} onClick={toLogin}>Войти</button>
             </>
         );
     }
@@ -310,42 +310,42 @@ const Profile = () => {
             ) : (
                 <>
                     <h2>Профиль</h2>
-                    {error && <span className="profile-error-message">{error}</span>}
-                    {success && <span className="profile-success-message">{success}</span>}
-                    <div className="profile-display-card">
-                        <div className="profile-avatar-container">
+                    {error && <span className={styles.errorMessage}>{error}</span>}
+                    {success && <span className={styles.successMessage}>{success}</span>}
+                    <div className={styles.displayCard}>
+                        <div className={styles.avatarContainer}>
                             <img
                                 src={userData.displayed_avatar_url}
                                 alt="Avatar"
-                                className="profile-avatar"
+                                className={styles.avatar}
                             />
                         </div>
-                        <div className="profile-info">
-                            <h3 className="profile-nick">{userData.displayed_nick || 'Не выбран'}</h3>
-                            <div className="profile-location">
-                                <span className="profile-region">{userData.region_display}</span>
+                        <div className={styles.info}>
+                            <h3 className={styles.nick}>{userData.displayed_nick || 'Не выбран'}</h3>
+                            <div className={styles.location}>
+                                <span className={styles.region}>{userData.region_display}</span>
                                 {userData.city_display && (
-                                    <span className="profile-city-separator">, </span>
+                                    <span className={styles.citySeparator}>, </span>
                                 )}
-                                <span className="profile-city">{userData.city_display}</span>
+                                <span className={styles.city}>{userData.city_display}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="profile-edit-section">
-                        <h3>Настройки отображения</h3>
+                    <div className={styles.editSection}>
+                        <h3 className={styles.editSectionTitle}>Настройки отображения</h3>
 
-                        <label className="profile-label">
+                        <label className={styles.label}>
                             Источник аватара:
-                            <select value={selectedAvatarSource} onChange={handleAvatarSourceChange} className="profile-select" disabled={loading}>
+                            <select value={selectedAvatarSource} onChange={handleAvatarSourceChange} className={styles.select} disabled={loading}>
                                 {hasOsu && <option value="osu">Osu!</option>}
                                 {hasDiscord && <option value="discord">Discord</option>}
                             </select>
                         </label>
 
-                        <label className="profile-label">
+                        <label className={styles.label}>
                             Источник ника:
-                            <select value={selectedNickSource} onChange={handleNickSourceChange} className="profile-select" disabled={loading}>
+                            <select value={selectedNickSource} onChange={handleNickSourceChange} className={styles.select} disabled={loading}>
                                 {hasOsu && <option value="osu">Osu! Username</option>}
                                 {hasDiscord && (
                                     <>
@@ -356,9 +356,9 @@ const Profile = () => {
                             </select>
                         </label>
 
-                        <label className="profile-label">
+                        <label className={styles.label}>
                             Регион:
-                            <select value={selectedRegion} onChange={handleRegionChange} className="profile-select" disabled={loading}>
+                            <select value={selectedRegion} onChange={handleRegionChange} className={styles.select} disabled={loading}>
                                 <option value="">Без региона</option>
                                 {regions.map((reg) => (
                                     <option key={reg.code} value={reg.code}>{reg.name}</option>
@@ -366,9 +366,9 @@ const Profile = () => {
                             </select>
                         </label>
 
-                        <label className="profile-label">
+                        <label className={styles.label}>
                             Город:
-                            <select value={selectedCity} onChange={handleCityChange} className="profile-select" disabled={!selectedRegion || loading}>
+                            <select value={selectedCity} onChange={handleCityChange} className={styles.select} disabled={!selectedRegion || loading}>
                                 <option value="">Без города</option>
                                 {cities.map((city) => (
                                     <option key={city.code} value={city.code}>{city.name}</option>
@@ -376,22 +376,22 @@ const Profile = () => {
                             </select>
                         </label>
 
-                        <button className="profile-save-button" onClick={handleSave} disabled={loading}>
+                        <button className={styles.saveButton} onClick={handleSave} disabled={loading}>
                             {loading ? 'Сохранение...' : 'Сохранить'}
                         </button>
                     </div>
 
                     {!hasDiscord && (
-                        <button className="profile-link-button discord" onClick={handleLinkDiscord} disabled={loading}>
+                        <button className={`${styles.linkButton} ${styles.linkButtonDiscord}`} onClick={handleLinkDiscord} disabled={loading}>
                             Привязать<img src={discordLogo} alt="" height="30px" width="30px"/>
                         </button>
                     )}
                     {!hasOsu && (
-                        <button className="profile-link-button osu" onClick={handleLinkOsu} disabled={loading}>
+                        <button className={`${styles.linkButton} ${styles.linkButtonOsu}`} onClick={handleLinkOsu} disabled={loading}>
                             Привязать<img src={osuLogo} alt="" width="30px" height="30px"/>
                         </button>
                     )}
-                    <button className="profile-logout-button" onClick={logout} disabled={loading}>
+                    <button className={styles.logoutButton} onClick={logout} disabled={loading}>
                         Выйти
                     </button>
                 </>

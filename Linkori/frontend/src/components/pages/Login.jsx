@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { loginWithDiscord, loginWithOsu, handleDiscordCallback, handleOsuCallback } from '../services/AuthService';
 import discordLogo from "../../media/discord.svg"
 import osuLogo from "../../media/osu.svg"
-import '../../styles/Login.css';
+import styles from '../../styles/Login.module.css';
 
 const Login = () => {
     const { accessToken, setTokens } = useAuth();
@@ -82,16 +82,16 @@ const Login = () => {
     return (
         <main>
             <h2>Авторизация</h2>
-            <p className="login-info">
+            <p className={styles.info}>
                 Для использования сервиса вам потребуется войти через ваши osu! и discord аккаунты.<br/>
                 <a href="/data-privacy/">Данные</a>, получаемые с верификации являются публично доступными. <br/> Вы всегда можете отозвать привязку
                 в настройках osu! или discord.
             </p>
-            {error && <span className="login-error-message">{error}</span>}
-            <button className="login-button discord" onClick={handleDiscordLogin}>
+            {error && <span className={styles.errorMessage}>{error}</span>}
+            <button className={`${styles.button} ${styles.buttonDiscord}`} onClick={handleDiscordLogin}>
                 Войти через<img src={discordLogo} alt="" height="40px" width="40px"/>
             </button>
-            <button className="login-button osu" onClick={handleOsuLogin}>
+            <button className={`${styles.button} ${styles.buttonOsu}`} onClick={handleOsuLogin}>
                 Войти через<img src={osuLogo} alt="" width="40px" height="40px"/>
             </button>
         </main>

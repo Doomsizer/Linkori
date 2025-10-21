@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
-import "../../styles/Leaderboard.css";
+import styles from "../../styles/Leaderboard.module.css";
 
 const Leaderboard = () => {
     const { isAuthenticated, accessToken, isRefreshing, isLinked } = useAuth();
@@ -227,23 +227,23 @@ const Leaderboard = () => {
     const startRank = (currentPage - 1) * 25 + 1;
 
     return (
-        <main className="leaderboard-main">
-            {error && <span className="leaderboard-error-message">{error}</span>}
+        <main className={styles.main}>
+            {error && <span className={styles.errorMessage}>{error}</span>}
             {loading ? (
                 <LoadingSpinner />
             ) : (
                 <>
                     {isAuthenticated && isLinked && (
-                        <div className="leaderboard-type-buttons">
+                        <div className={styles.typeButtons}>
                             <button
                                 onClick={() => handleLeaderboardType('usual')}
-                                className={`leaderboard-type-button ${!isServerMode ? 'active' : ''}`}
+                                className={`${styles.typeButton} ${!isServerMode ? styles.active : ''}`}
                             >
                                 Обычный
                             </button>
                             <button
                                 onClick={() => handleLeaderboardType('server')}
-                                className={`leaderboard-type-button ${isServerMode ? 'active' : ''}`}
+                                className={`${styles.typeButton} ${isServerMode ? styles.active : ''}`}
                             >
                                 Серверный
                             </button>
@@ -251,7 +251,7 @@ const Leaderboard = () => {
                     )}
 
                     {isAuthenticated && !isLinked && (
-                        <div className="leaderboard-main-error">
+                        <div className={styles.mainError}>
                             <p style={{ color: 'var(--linkori-white)', textAlign: 'center' }}>
                                 Вы вошли только при помощи одного сервиса.
                                 Перейдите в свой профиль и привяжите второй сервис для открытия фильтрации лидербордов
@@ -260,28 +260,28 @@ const Leaderboard = () => {
                     )}
 
                     {isAuthenticated && isLinked && !isServerMode && (
-                        <div className="leaderboard-filters">
-                            <label className="leaderboard-label">
+                        <div className={styles.filters}>
+                            <label className={styles.label}>
                                 Режим:
-                                <select value={selectedMode} onChange={handleModeChange} className="leaderboard-select">
+                                <select value={selectedMode} onChange={handleModeChange} className={styles.select}>
                                     <option value="osu">osu!</option>
                                     <option value="taiko">taiko</option>
                                     <option value="fruits">fruits</option>
                                     <option value="mania">mania</option>
                                 </select>
                             </label>
-                            <label className="leaderboard-label">
+                            <label className={styles.label}>
                                 Регион:
-                                <select value={selectedRegion} onChange={handleRegionChange} className="leaderboard-select">
+                                <select value={selectedRegion} onChange={handleRegionChange} className={styles.select}>
                                     <option value="">Все регионы</option>
                                     {regions.map((reg) => (
                                         <option key={reg.code} value={reg.code}>{reg.name}</option>
                                     ))}
                                 </select>
                             </label>
-                            <label className="leaderboard-label">
+                            <label className={styles.label}>
                                 Город:
-                                <select value={selectedCity} onChange={handleCityChange} className="leaderboard-select" disabled={!selectedRegion}>
+                                <select value={selectedCity} onChange={handleCityChange} className={styles.select} disabled={!selectedRegion}>
                                     <option value="">Все города</option>
                                     {cities.map((city) => (
                                         <option key={city.code} value={city.code}>{city.name}</option>
@@ -292,22 +292,22 @@ const Leaderboard = () => {
                     )}
 
                     {isServerMode && isAuthenticated && isLinked && userServers.length > 0 && (
-                        <div className="leaderboard-servers">
+                        <div className={styles.servers}>
                             {userServers.map((server) => (
                                 <button
                                     key={server.server_id}
                                     onClick={() => handleServerSelect(server.server_id)}
-                                    className={`leaderboard-server-button ${selectedServer === server.server_id ? 'active' : ''}`}
+                                    className={`${styles.serverButton} ${selectedServer === server.server_id ? styles.active : ''}`}
                                 >
                                     <img
                                         src={getServerIconUrl(server.server_icon, server.server_id)}
                                         alt={server.server_name}
-                                        className="server-icon"
+                                        className={styles.icon}
                                         onError={(e) => { e.target.src = '/default-server-icon.png'; }}
                                     />
-                                    <div className="server-info">
-                                        <span className="server-name">{server.server_name}</span>
-                                        <span className="server-members">{server.member_count} участников</span>
+                                    <div className={styles.info}>
+                                        <span className={styles.name}>{server.server_name}</span>
+                                        <span className={styles.members}>{server.member_count} участников</span>
                                     </div>
                                 </button>
                             ))}
@@ -315,16 +315,16 @@ const Leaderboard = () => {
                     )}
 
                     {isServerMode && isAuthenticated && isLinked && userServers.length === 0 && (
-                        <div className="leaderboard-servers-error">
+                        <div className={styles.serversError}>
                             <p style={{ color: 'var(--linkori-white)', textAlign: 'center' }}>
                                 Вы не были найдены ни на одном из наших серверов. Если вы недавно вступили в сервер,
                                 на котором есть бот Linkori - выйдите из аккаунта
                                 на сайте и авторизуйтесь при помощи дискорда. <br/>
-                                Это обновит ваш список серверов и найдет сходства в серверах бота. Спасибо за понимание.
+                                Это просканирует ваш список серверов и найдет сходства в серверах бота. Спасибо за понимание.
                             </p>
                         </div>
                     )}
-                    <table className="leaderboard-table">
+                    <table className={styles.table}>
                         <thead>
                         <tr>
                             <th>Ранг</th>
@@ -339,42 +339,42 @@ const Leaderboard = () => {
                         <tbody>
                         {leaderboardData.map((entry, index) => (
                             <tr key={entry.user.osu_id || index}>
-                                <td className="leaderboard-rank">{startRank + index}</td>
-                                <td className="leaderboard-player">
-                                    <a className="leaderboard-player-link" href={`https://osu.ppy.sh/users/${entry.user.osu_id}`}>
+                                <td className={styles.rank}>{startRank + index}</td>
+                                <td className={styles.player}>
+                                    <a className={styles.playerLink} href={`https://osu.ppy.sh/users/${entry.user.osu_id}`}>
                                         <img
                                             src={entry.user.avatar_url || 'https://osu.ppy.sh/images/layout/avatar-guest@2x.png'}
                                             alt={entry.user.nick}
-                                            className="leaderboard-avatar"
+                                            className={styles.avatar}
                                             onError={(e) => { e.target.src = 'https://osu.ppy.sh/images/layout/avatar-guest@2x.png'; }}
                                         />
-                                        <span className="leaderboard-nick">{entry.user.nick}</span>
+                                        <span className={styles.nick}>{entry.user.nick}</span>
                                     </a>
                                 </td>
-                                <td className="leaderboard-pp">{Math.round(entry.pp)}</td>
-                                <td className="leaderboard-global-rank">{entry.global_rank ? `#${entry.global_rank}` : '-'}</td>
-                                <td className="leaderboard-country-rank">{entry.country_rank ? `#${entry.country_rank}` : '-'}</td>
-                                <td className="leaderboard-region">{getRegionName(entry.user.region)}</td>
-                                <td className="leaderboard-city">{getCityName(entry.user.cities)}</td>
+                                <td className={styles.pp}>{Math.round(entry.pp)}</td>
+                                <td className={styles.globalRank}>{entry.global_rank ? `#${entry.global_rank}` : '-'}</td>
+                                <td className={styles.countryRank}>{entry.country_rank ? `#${entry.country_rank}` : '-'}</td>
+                                <td className={styles.region}>{getRegionName(entry.user.region)}</td>
+                                <td className={styles.city}>{getCityName(entry.user.cities)}</td>
                             </tr>
                         ))}
                         </tbody>
                     </table>
-                    <div className="leaderboard-pagination">
+                    <div className={styles.pagination}>
                         <button
                             onClick={handlePreviousPage}
                             disabled={!previousUrl}
-                            className="leaderboard-pagination-button"
+                            className={styles.paginationButton}
                         >
                             Предыдущая
                         </button>
-                        <span className="leaderboard-page-info">
+                        <span className={styles.pageInfo}>
                             Страница {currentPage} из {totalPages}
                         </span>
                         <button
                             onClick={handleNextPage}
                             disabled={!nextUrl}
-                            className="leaderboard-pagination-button"
+                            className={styles.paginationButton}
                         >
                             Следующая
                         </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/Header.css"
+import styles from "../../styles/Header.module.css"
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -49,33 +49,31 @@ const Header = () => {
 
     return (
         <header>
-            <button className="header-logo" onClick={toMainpage}>Linkori</button>
-            <div className="header-auth">
-                {loading ? (
-                    <LoadingSpinner/>
-                ) : accessToken && userData ? (
-                    <div className="header-user-info">
-                        <div className="header-user" onClick={toProfile}>
-                            <img
-                                src={userData.displayed_avatar_url}
-                                alt="Avatar"
-                                className="header-avatar"
-                            />
-                            <span className="header-nick">{userData.displayed_nick}</span>
-                        </div>
-                        <button className="header-logout-btn" onClick={logout}>
-                            Выйти
-                        </button>
+            <button className={styles.logo} onClick={toMainpage}>Linkori</button>
+            {loading ? (
+                <LoadingSpinner/>
+            ) : accessToken && userData ? (
+                <div className={styles.userContainer}>
+                    <div className={styles.userInfo} onClick={toProfile}>
+                        <img
+                            src={userData.displayed_avatar_url}
+                            alt="Avatar"
+                            className={styles.userAvatar}
+                        />
+                        <span>{userData.displayed_nick}</span>
                     </div>
-                ) : (
-                    <button
-                        className="header-login-btn"
-                        onClick={() => navigate('/login')}
-                    >
-                        Войти
+                    <button className={styles.logoutBtn} onClick={logout}>
+                        Выйти
                     </button>
-                )}
-            </div>
+                </div>
+            ) : (
+                <button
+                    className={styles.loginBtn}
+                    onClick={() => navigate('/login')}
+                >
+                    Войти
+                </button>
+            )}
         </header>
     );
 };

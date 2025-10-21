@@ -9,6 +9,9 @@
     --linkori-brown: rgb(120, 94, 95);
     --osu-pink: rgb(255, 102, 170);
     --discord-blue: rgb(119, 133, 204);
+    --linkori-section: rgba(110, 98, 144, 0.1);
+
+    --linkori-default-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
 html, body {
@@ -57,9 +60,9 @@ main {
     justify-content: center;
     align-items: center;
     padding: 40px;
-    background-color: rgba(119, 133, 204, 0.1);
+    background-color: var(--linkori-section);
     border-radius: 20px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--linkori-default-shadow);
     border: 1px solid var(--linkori-lavander);
 
 }

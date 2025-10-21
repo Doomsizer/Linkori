@@ -1,4 +1,4 @@
-.login-button {
+.button {
     color: var(--linkori-white);
     width: 15%;
     padding: 10px 20px;
@@ -13,24 +13,24 @@
     align-items: center;
 }
 
-.login-button:hover {
+.button:hover {
     opacity: 80%;
 }
 
-.login-info {
+.info {
     text-align: center;
     font-size: 20px;
 }
 
-.login-button.osu {
-    background-color: var(--osu-pink);
-}
-
-.login-button.discord {
+.buttonDiscord {
     background-color: var(--discord-blue);
 }
 
-.login-error-message {
+.buttonOsu {
+    background-color: var(--osu-pink);
+}
+
+.errorMessage {
     color: var(--linkori-red);
     margin-bottom: 10px;
 }

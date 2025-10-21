@@ -6,7 +6,7 @@ header {
     padding: 50px;
 }
 
-.header-logo {
+.logo {
     background-color: transparent;
     border: none;
     font-family: inherit;
@@ -16,7 +16,7 @@ header {
     cursor: pointer;
 }
 
-.header-login-btn {
+.loginBtn {
     background-color: var(--linkori-lavander);
     color: var(--linkori-white);
     padding: 10px 20px;
@@ -27,17 +27,17 @@ header {
     font-family: inherit;
 }
 
-.header-login-btn:hover {
+.loginBtn:hover {
     opacity: 70%;
 }
 
-.header-user-info {
+.userInfo {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-.header-user {
+.userContainer {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -47,18 +47,18 @@ header {
     transition: background-color 0.2s;
 }
 
-.header-user:hover {
+.userContainer:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.header-avatar {
+.userAvatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
 }
 
-.header-logout-btn {
+.logoutBtn {
     background-color: var(--linkori-red);
     color: white;
     border: none;
@@ -68,6 +68,6 @@ header {
     transition: background-color 0.2s;
 }
 
-.header-logout-btn:hover {
+.logoutBtn:hover {
     opacity: 70%;
 }

@@ -19,13 +19,13 @@ footer {
 
 }
 
-.footer-contact {
+.contactInfo {
     display: flex;
     justify-content: space-between;
     gap: 20px;
 }
 
-.footer-copyright {
+.copyright {
     font-size: 20px;
     margin: 0;
 }

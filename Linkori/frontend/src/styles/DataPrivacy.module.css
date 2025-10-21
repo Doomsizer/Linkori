@@ -1,0 +1,59 @@
+.content {
+    max-width: 900px;
+    width: 100%;
+}
+
+.content h1 {
+    text-align: center;
+    color: var(--linkori-white);
+    margin-bottom: 2.5rem;
+    font-size: 2.2rem;
+}
+
+.section {
+    background-color: var(--linkori-section);
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--linkori-lavander);
+}
+
+.section h2 {
+    color: var(--linkori-white);
+    border-bottom: 1px solid var(--linkori-lavander);
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+.info {
+    font-size: 1.1rem;
+    text-align: justify;
+    margin-bottom: 1.2rem;
+    color: var(--linkori-white);
+}
+
+.exclusionList, .usageList {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.exclusionList li, .usageList li {
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.exclusionList {
+    color: var(--linkori-white);
+    li::marker {
+        color: var(--linkori-red);
+        font-size: 1.2rem;
+    }
+}
+
+.usageList {
+    color: var(--linkori-white);
+    li::marker {
+        color: var(--linkori-red);
+        font-size: 1.2rem;
+    }
+}
