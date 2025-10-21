@@ -1,4 +1,3 @@
-from attr.validators import max_len
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from Leaderboard.regions import REGIONS, CITIES
@@ -15,7 +14,7 @@ NICK_SOURCES = [
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, discord_id=None, osu_id=None, **extra_fields):
+    def create_user(self, discord_id=None, osu_id=None, is_staff=False, is_superuser=False, **extra_fields):
         identifier = extra_fields.pop('identifier', None)
         if not discord_id and not osu_id and not identifier:
             raise ValueError('Должен быть указан хотя бы один ID: discord_id или osu_id, или identifier')
@@ -25,7 +24,12 @@ class CustomUserManager(BaseUserManager):
         elif osu_id:
             identifier = f'osu:{osu_id}'
 
-        user = self.model(identifier=identifier, **extra_fields)
+        user = self.model(
+            identifier=identifier,
+            is_staff=is_staff,
+            is_superuser=is_superuser,
+            **extra_fields
+        )
         user.save(using=self._db)
         return user
 
@@ -42,7 +46,6 @@ class CustomUserManager(BaseUserManager):
             identifier = 'admin:1'
 
         return self.create_user(discord_id=discord_id, osu_id=osu_id, identifier=identifier, **extra_fields)
-
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     identifier = models.CharField(max_length=100, unique=True)

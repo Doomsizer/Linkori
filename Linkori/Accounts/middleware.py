@@ -1,4 +1,5 @@
 import logging
+from django.shortcuts import redirect
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.contrib.auth import get_user_model
@@ -37,3 +38,18 @@ class CustomJWTMiddleware:
 
         response = self.get_response(request)
         return response
+
+class AdminAccessMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        return response
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        if request.path.startswith('/admin/'):
+            if not request.path.startswith('/admin/static/') and not request.path.startswith('/admin/media/'):
+                if not request.user.is_authenticated or not request.user.is_staff:
+                    return redirect('/')
+        return None
