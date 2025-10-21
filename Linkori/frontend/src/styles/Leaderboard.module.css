@@ -161,7 +161,6 @@
 .paginationButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: var(--linkori-brown);
 }
 
 .pageInfo {
@@ -207,7 +206,6 @@
 .typeButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background-color: var(--linkori-brown);
 }
 
 .filters {
@@ -258,7 +256,6 @@
 }
 
 .select:disabled {
-    background-color: var(--linkori-brown);
     opacity: 0.5;
     cursor: not-allowed;
 }
