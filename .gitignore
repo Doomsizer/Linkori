@@ -2,11 +2,11 @@
 /.idea/*
 /Linkori/frontend/node_modules/*
 .gitingore
+Linkori/.env
 Linkori/frontend/package-lock.json
 Linkori/staticfiles/*
 Linkori/dist/*
 Linkori/certs/*
-/Linkori/Linkori/config.py
 /Linkori/db.sqlite3
 __pycache__/
 migrations/
