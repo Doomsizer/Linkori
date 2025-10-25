@@ -11,8 +11,8 @@ export const instance = axios.create({
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || null);
-    const [isLinked, setIsLinked] = useState(false)
+    const [accessToken, setAccessToken] = useState(null);
+    const [isLinked, setIsLinked] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -54,20 +54,28 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const checkAuth = async () => {
-            if (accessToken) {
-                const result = await verifyToken(accessToken);
+            const storedToken = localStorage.getItem('accessToken');
+            if (storedToken) {
+                const result = await verifyToken(storedToken);
                 if (result.isValid) {
+                    setAccessToken(storedToken);
                     setIsAuthenticated(true);
                     setIsLinked(result.isLinked);
                 } else {
-                    setIsLinked(false);
                     setIsRefreshing(true);
                     const newToken = await refreshAccessToken(setTokens, logout);
-                    setIsAuthenticated(!!newToken);
+                    if (newToken) {
+                        setIsAuthenticated(true);
+                        const refreshResult = await verifyToken(newToken);
+                        setIsLinked(refreshResult.isLinked || false);
+                    } else {
+                        setIsAuthenticated(false);
+                        setIsLinked(false);
+                    }
                 }
             } else {
-                setIsLinked(false);
                 setIsAuthenticated(false);
+                setIsLinked(false);
             }
         };
 

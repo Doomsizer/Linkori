@@ -146,15 +146,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if not (parsed_url.scheme in ['http', 'https'] and
                 parsed_url.netloc in ['a.ppy.sh', 's.ppy.sh']):
             return None
-        full_path = parsed_url.path + ('?' + parsed_url.query if parsed_url.query else '')
-        if not re.search(r'\.(png|jpg|jpeg|gif)', full_path, re.IGNORECASE):
-            return None
-        try:
-            response = requests.head(avatar_url, timeout=2)
-            if response.status_code != 200:
-                return None
-        except requests.RequestException:
-            return None
         return avatar_url
 
     def _validate_discord_avatar(self, discord_user):
