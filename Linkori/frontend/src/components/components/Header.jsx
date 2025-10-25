@@ -27,10 +27,8 @@ const Header = () => {
                     const data = await response.json();
                     setUserData(data);
                 } else {
-                    console.error('Не удалось загрузить данные пользователя');
                 }
             } catch (error) {
-                console.error('Ошибка при загрузке данных пользователя:', error);
             } finally {
                 setLoading(false);
             }
