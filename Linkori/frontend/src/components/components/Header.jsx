@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/Header.module.css"
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, instance } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
 
@@ -18,17 +18,13 @@ const Header = () => {
             }
 
             try {
-                const response = await fetch('https://127.0.0.1:8000/accounts/user/', {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    credentials: 'include',
+                const response = await instance.get('/accounts/user/', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserData(data);
-                } else {
-                }
+                setUserData(response.data);
             } catch (error) {
+                console.error('Error fetching user data:', error);
             } finally {
                 setLoading(false);
             }

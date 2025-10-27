@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth, instance } from '../hooks/useAuth';
 import { loginWithDiscord, loginWithOsu } from '../services/AuthService';
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -74,17 +74,10 @@ const Profile = () => {
         if (!accessToken || !regionCode) return;
         setLoading(true);
         try {
-            const res = await fetch(`https://127.0.0.1:8000/accounts/cities/?region=${regionCode}`, {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                credentials: 'include',
+            const { data } = await instance.get(`/accounts/cities/?region=${regionCode}`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
-            if (res.ok) {
-                const data = await res.json();
-                setCities(data.cities || []);
-            } else {
-                setCities([]);
-                setError('Ошибка загрузки городов');
-            }
+            setCities(data.cities || []);
         } catch (err) {
             setCities([]);
             setError('Ошибка при загрузке городов');
@@ -99,36 +92,31 @@ const Profile = () => {
         setError(null);
 
         try {
-            const response = await fetch('https://127.0.0.1:8000/accounts/user/', {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                credentials: 'include',
+            const { data } = await instance.get('/accounts/user/', {
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
-            if (response.ok) {
-                const data = await response.json();
-                setUserData(data);
 
-                let avatarSource = data.avatar_source;
-                if (!avatarSource) {
-                    avatarSource = data.osu_user && data.osu_user.osu.avatar_url ? 'osu' :
-                        data.discord_user && data.discord_user.avatar ? 'discord' : '';
-                }
+            setUserData(data);
 
-                let nickSource = data.nick_source;
-                if (!nickSource) {
-                    nickSource = data.osu_user && data.osu_user.osu.nick ? 'osu' :
-                        data.discord_user && data.discord_user.nick ? 'discord_username' : '';
-                }
+            let avatarSource = data.avatar_source;
+            if (!avatarSource) {
+                avatarSource = data.osu_user && data.osu_user.osu.avatar_url ? 'osu' :
+                    data.discord_user && data.discord_user.avatar ? 'discord' : '';
+            }
 
-                setSelectedAvatarSource(avatarSource);
-                setSelectedNickSource(nickSource);
-                setSelectedRegion(data.region || '');
-                setSelectedCity(data.city || '');
+            let nickSource = data.nick_source;
+            if (!nickSource) {
+                nickSource = data.osu_user && data.osu_user.osu.nick ? 'osu' :
+                    data.discord_user && data.discord_user.nick ? 'discord_username' : '';
+            }
 
-                if (data.region) {
-                    await fetchCities(data.region);
-                }
-            } else {
-                setError('Не удалось загрузить данные пользователя');
+            setSelectedAvatarSource(avatarSource);
+            setSelectedNickSource(nickSource);
+            setSelectedRegion(data.region || '');
+            setSelectedCity(data.city || '');
+
+            if (data.region) {
+                await fetchCities(data.region);
             }
         } catch (error) {
             setError('Ошибка при загрузке данных');
@@ -141,14 +129,8 @@ const Profile = () => {
             if (!accessToken) return;
 
             try {
-                const regionsRes = await fetch('https://127.0.0.1:8000/accounts/regions/', {
-                });
-                if (regionsRes.ok) {
-                    const regionsData = await regionsRes.json();
-                    setRegions(regionsData.regions || []);
-                } else {
-                    setError('Не удалось загрузить регионы');
-                }
+                const { data: regionsData } = await instance.get('/accounts/regions/');
+                setRegions(regionsData.regions || []);
             } catch (err) {
                 setError('Ошибка при загрузке регионов');
             }

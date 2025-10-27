@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, instance } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../components/LoadingSpinner";
 import styles from "../../styles/Leaderboard.module.css";
@@ -33,14 +33,8 @@ const Leaderboard = () => {
 
     const fetchRegions = useCallback(async () => {
         try {
-            const response = await fetch('https://127.0.0.1:8000/accounts/regions/', {
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setRegions(data.regions || []);
-            } else {
-                setError('Ошибка загрузки регионов');
-            }
+            const { data } = await instance.get('/accounts/regions/');
+            setRegions(data.regions || []);
         } catch (err) {
             setError('Ошибка при загрузке регионов');
         }
@@ -48,14 +42,8 @@ const Leaderboard = () => {
 
     const fetchAllCities = useCallback(async () => {
         try {
-            const response = await fetch('https://127.0.0.1:8000/leaderboard/cities/', {
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setAllCities(data.cities || []);
-            } else {
-                setError('Ошибка загрузки списка городов');
-            }
+            const { data } = await instance.get('/leaderboard/cities/');
+            setAllCities(data.cities || []);
         } catch (err) {
             setError('Ошибка при загрузке списка городов');
         }
@@ -65,17 +53,9 @@ const Leaderboard = () => {
         if (!regionCode) return;
         setLoading(true);
         try {
-            const res = await fetch(`https://127.0.0.1:8000/accounts/cities/?region=${regionCode}`, {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                credentials: 'include',
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setCities(data.cities || []);
-            } else {
-                setCities([]);
-                setError('Ошибка загрузки городов');
-            }
+            const headers = {Authorization: `Bearer ${accessToken}`}
+            const { data } = await instance.get(`/accounts/cities/?region=${regionCode}`, { headers });
+            setCities(data.cities || []);
         } catch (err) {
             setCities([]);
             setError('Ошибка при загрузке городов');
@@ -86,16 +66,9 @@ const Leaderboard = () => {
     const fetchUserServers = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await fetch('https://127.0.0.1:8000/leaderboard/user-servers/', {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setUserServers(data.servers || data || []);
-            } else {
-                setError('Ошибка загрузки серверов');
-            }
+            const headers = {Authorization: `Bearer ${accessToken}`}
+            const { data } = await instance.get('/leaderboard/user-servers/', { headers });
+            setUserServers(data.servers || data || []);
         } catch (err) {
             setError('Ошибка при загрузке серверов');
         }
@@ -103,7 +76,7 @@ const Leaderboard = () => {
     }, [accessToken]);
 
     const buildUrl = (page = 1) => {
-        let url = `https://127.0.0.1:8000/leaderboard/leaderboard/?page=${page}&mode=${selectedMode}`;
+        let url = `/leaderboard/leaderboard/?page=${page}&mode=${selectedMode}`;
         if (selectedRegion) {
             url += `&region=${selectedRegion}`;
         }
@@ -122,23 +95,15 @@ const Leaderboard = () => {
 
         try {
             const headers = isAuthenticated && isLinked ? { Authorization: `Bearer ${accessToken}` } : {};
-            const response = await fetch(url, {
-                headers,
-                credentials: 'include',
-            });
+            const { data } = await instance.get(url, { headers });
 
-            if (response.ok) {
-                const data = await response.json();
-                setLeaderboardData(data.results || []);
-                setTotalPages(Math.ceil(data.count / 25));
-                setNextUrl(data.next);
-                setPreviousUrl(data.previous);
-            } else {
-                const errData = await response.json().catch(() => ({}));
-                setError(errData.detail || 'Ошибка загрузки лидерборда');
-            }
+            setLeaderboardData(data.results || []);
+            setTotalPages(Math.ceil(data.count / 25));
+            setNextUrl(data.next);
+            setPreviousUrl(data.previous);
         } catch (err) {
-            setError('Ошибка при загрузке лидерборда');
+            const errData = err.response?.data || {};
+            setError(errData.detail || 'Ошибка загрузки лидерборда');
         }
         setLoading(false);
     }, [isAuthenticated, isLinked, accessToken]);
@@ -147,7 +112,7 @@ const Leaderboard = () => {
         fetchAllCities();
         fetchRegions();
 
-        const initialUrl = (isAuthenticated && isLinked) ? buildUrl() : `https://127.0.0.1:8000/leaderboard/mainboard/?page=1&page_size=25`;
+        const initialUrl = (isAuthenticated && isLinked) ? buildUrl() : '/leaderboard/mainboard/?page=1&page_size=25';
         fetchLeaderboard(initialUrl);
     }, [isAuthenticated, isLinked, fetchRegions, fetchLeaderboard, fetchAllCities, selectedMode, selectedRegion, selectedCity, selectedServer]);
 
