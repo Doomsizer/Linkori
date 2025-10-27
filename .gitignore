@@ -9,7 +9,6 @@ Linkori/dist/*
 Linkori/certs/*
 /Linkori/db.sqlite3
 __pycache__/
-migrations/
 celerybeat-schedule.bak
 celerybeat-schedule.dat
 celerybeat-schedule.dir
