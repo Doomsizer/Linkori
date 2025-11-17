@@ -72,10 +72,13 @@ class OsuApiService:
         try:
             response = OsuApiService.session.post(token_url, data=data, timeout=10)
             if response.status_code != 200:
-                error_msg = response.json().get('error', 'Unknown error')
-                logger.error(f"Failed to get osu! token for {app.name}: {error_msg}")
-                if error_msg == 'invalid_client':
-                    app.increment_error()
+                try:
+                    resp_data = response.json()
+                    error_msg = resp_data.get('error', 'Unknown error')
+                except ValueError:
+                    error_msg = 'Invalid JSON response'
+                logger.error(f"Failed to get osu! token for {app.name}: HTTP {response.status_code}, {error_msg}")
+                app.increment_error()
                 return None
             data = response.json()
             app.access_token = data['access_token']
@@ -84,6 +87,10 @@ class OsuApiService:
             return app.access_token
         except requests.RequestException as e:
             logger.error(f"Request error getting token for {app.name}: {str(e)}")
+            app.increment_error()
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error getting token for {app.name}: {str(e)}")
             app.increment_error()
             return None
 
@@ -130,15 +137,22 @@ class OsuApiService:
                 logger.warning(f"User {user_id} not found (404)")
                 return None
             elif user_response.status_code != 200:
-                error_msg = user_response.json().get('error', 'Unknown error') if user_response.text else 'No response'
+                try:
+                    resp_data = user_response.json()
+                    error_msg = resp_data.get('error', 'Unknown error')
+                except ValueError:
+                    error_msg = 'Invalid JSON response'
                 logger.error(f"Failed to get user data for {user_id}: HTTP {user_response.status_code}, {error_msg}")
-                if error_msg == 'invalid_client':
-                    app.increment_error()
+                app.increment_error()
                 return None
 
             return user_response.json()
         except requests.RequestException as e:
             logger.error(f"Request error for user {user_id}: {str(e)}")
+            app.increment_error()
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error for user {user_id}: {str(e)}")
             app.increment_error()
             return None
 

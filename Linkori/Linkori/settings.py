@@ -79,9 +79,12 @@ WSGI_APPLICATION = 'Linkori.wsgi.application'
 AUTH_USER_MODEL = 'Accounts.CustomUser'
 
 CORS_ALLOWED_ORIGINS = [
+    'https://localhost:8000',
+    'https://127.0.0.1:8000',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 
 SECURE_SSL_REDIRECT = False
